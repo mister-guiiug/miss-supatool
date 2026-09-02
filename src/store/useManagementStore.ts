@@ -267,6 +267,12 @@ export const useManagementStore = create<ManagementState>()((set, get) => ({
           set({ applyProgress: { done, total, current: current.object } }),
       });
       set({ results });
+
+      // Le schéma de la cible vient de changer : sans ce rafraîchissement,
+      // l'écran Contenu continuerait d'annoncer « absente de la cible » pour
+      // des tables qui viennent d'être créées, et la copie resterait bloquée
+      // sur un constat périmé. La sélection, elle, est préservée par `analyze`.
+      if (!get().dryRun) await useStore.getState().analyze();
     } catch (error) {
       set({ structureError: describeError(error) });
     } finally {

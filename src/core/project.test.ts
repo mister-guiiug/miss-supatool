@@ -58,8 +58,11 @@ describe('inspectKey', () => {
     });
   });
 
-  it('reconnaît les clés nommées', () => {
-    expect(inspectKey('sb_secret_' + 'A'.repeat(20)).role).toBe('service_role');
+  it('reconnaît les clés nommées, et distingue le format nouveau', () => {
+    // `secret` et non `service_role` : les deux ouvrent la base, mais elles ne
+    // sont pas interchangeables en pratique — d'où un rôle distinct, qui permet
+    // de prévenir l'utilisateur au lieu de la présenter comme équivalente.
+    expect(inspectKey('sb_secret_' + 'A'.repeat(20)).role).toBe('secret');
     expect(inspectKey('sb_publishable_' + 'A'.repeat(20)).role).toBe(
       'publishable'
     );
@@ -81,6 +84,15 @@ describe('checkConnection', () => {
     expect(check.ok).toBe(true);
     expect(check.warnings).toEqual([]);
     expect(check.normalized?.base).toBe(url);
+  });
+
+  it('avertit sur une clé « secrète » nouveau format sans la refuser', () => {
+    const check = checkConnection(
+      { url, key: 'sb_secret_' + 'A'.repeat(20) },
+      'target'
+    );
+    expect(check.ok).toBe(true);
+    expect(check.warnings.join(' ')).toMatch(/service_role/);
   });
 
   it('avertit qu’une clé publique ne verra pas tout', () => {

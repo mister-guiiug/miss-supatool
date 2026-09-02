@@ -222,15 +222,22 @@ export class ManagementClient {
 /**
  * Choisit la clé de service parmi celles du projet.
  *
- * Deux générations coexistent : les clés historiques, distinguées par leur
- * `name` (`service_role`), et les nouvelles, distinguées par leur `type`
- * (`secret`). Les deux sont acceptées, la nouvelle d'abord.
+ * Deux générations coexistent : la clé historique, un JWT reconnaissable à son
+ * `name` (`service_role`), et la nouvelle, reconnaissable à son `type`
+ * (`secret`, préfixe `sb_secret_`).
+ *
+ * **La clé historique passe d'abord**, et l'ordre inverse a été essayé : sur un
+ * projet réellement créé par cette application, la connexion renseignée avec
+ * une clé `sb_secret_…` ne fonctionnait pas. Le format nouveau n'est pas
+ * accepté partout où l'ancien l'est — et l'outil parle à PostgREST et à l'API
+ * Storage, pas seulement au portail. On prend donc celle qui marche, et la
+ * nouvelle reste un repli pour les projets qui n'auraient plus que celle-là.
  */
 export function pickServiceKey(keys: readonly ApiKey[]): string | undefined {
-  const secret = keys.find(key => key.type === 'secret' && key.api_key);
-  if (secret?.api_key) return secret.api_key;
   const legacy = keys.find(key => key.name === 'service_role' && key.api_key);
-  return legacy?.api_key;
+  if (legacy?.api_key) return legacy.api_key;
+  const secret = keys.find(key => key.type === 'secret' && key.api_key);
+  return secret?.api_key;
 }
 
 export interface WaitOptions {

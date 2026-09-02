@@ -267,12 +267,15 @@ export const useStore = create<AppState>()((set, get) => ({
         storageError = describeError(error);
       }
 
-      // Sélection par défaut : ce qui existe des DEUX côtés. Proposer de
-      // copier une table absente de la cible ne mènerait qu'à un échec.
-      const targetNames = new Set(targetSchema.tables.map(t => t.name));
+      // Sélection par défaut : TOUT ce que la source peut donner, y compris ce
+      // qui manque encore à la cible. Ces tables-là étaient auparavant écartées
+      // — « proposer de copier une table absente ne mènerait qu'à un échec » —
+      // ce qui était vrai tant que l'outil ne créait pas de structure. Il le
+      // fait maintenant : les écarter reviendrait à cacher la moitié du travail
+      // de migration à celui qui vient justement le faire.
       const previous = new Set(get().selectedTables);
       const candidates = sourceSchema.tables
-        .filter(t => t.insertable && targetNames.has(t.name))
+        .filter(t => t.insertable)
         .map(t => t.name);
       const selectedTables =
         previous.size > 0

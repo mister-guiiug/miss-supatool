@@ -55,7 +55,7 @@ export function diffTable(
         level: 'blocking',
         table: source.name,
         code: 'table-missing',
-        message: `La table « ${source.name} » n'existe pas dans le projet cible. Appliquez d'abord vos migrations.`,
+        message: `La table « ${source.name} » n'existe pas encore dans le projet cible : créez la structure (étape Structure), ou appliquez vos migrations, puis relancez l'analyse.`,
       },
     ];
   }

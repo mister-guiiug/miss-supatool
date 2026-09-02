@@ -7,6 +7,7 @@ import { formatNumber } from '@mister-guiiug/dev-wpa-config/format';
 import {
   AlertTriangle,
   ArrowRight,
+  Boxes,
   CircleAlert,
   Info,
   Table2,
@@ -48,11 +49,19 @@ export function AnalyzeScreen() {
 
   const plan = buildPlan();
   const targetNames = new Set(targetSchema.tables.map(t => t.name));
-  const copyable = sourceSchema.tables.filter(
-    t => t.insertable && targetNames.has(t.name)
-  );
-  const missingOnTarget = sourceSchema.tables.filter(
-    t => !targetNames.has(t.name)
+  /**
+   * Toutes les tables de la source, y compris celles qui manquent à la cible.
+   *
+   * Elles étaient auparavant écartées de la liste : « absentes de la cible,
+   * donc non proposées ». C'était vrai tant que l'outil ne savait pas créer de
+   * structure — ce n'est plus le cas. Une table absente n'est plus un
+   * cul-de-sac, c'est une table à créer avant d'être remplie, et la choisir ici
+   * est le seul moyen de dire qu'on la veut.
+   */
+  const selectable = sourceSchema.tables.filter(t => t.insertable);
+  const missingOnTarget = selectable.filter(t => !targetNames.has(t.name));
+  const missingSelected = missingOnTarget.filter(t =>
+    selectedTables.includes(t.name)
   );
   const issues = plan?.issues ?? [];
   const levels = countByLevel(issues);
@@ -63,8 +72,8 @@ export function AnalyzeScreen() {
       <Card as="section">
         <CardHeader
           as="h2"
-          title="Ce que les deux projets ont en commun"
-          subtitle={`${copyable.length} table(s) copiable(s) sur ${sourceSchema.tables.length} à la source.`}
+          title="Ce que les deux projets contiennent"
+          subtitle={`${selectable.length} table(s) à la source, dont ${missingOnTarget.length} à créer dans la cible.`}
         />
         <div className="flex flex-wrap gap-2 text-sm">
           <Badge tone="info">
@@ -82,7 +91,7 @@ export function AnalyzeScreen() {
         </div>
         {missingOnTarget.length > 0 ? (
           <p className="mt-2 text-sm text-[var(--st-text-soft)]">
-            Absentes de la cible, donc non proposées&nbsp;:{' '}
+            Absentes de la cible&nbsp;:{' '}
             <span className="mono">
               {missingOnTarget
                 .slice(0, 8)
@@ -90,6 +99,9 @@ export function AnalyzeScreen() {
                 .join(', ')}
               {missingOnTarget.length > 8 ? '…' : ''}
             </span>
+            . Sélectionnez-les quand même&nbsp;: l'étape{' '}
+            <Link to="/structure">Structure</Link> les créera, et elles seront
+            alors remplissables.
           </p>
         ) : null}
       </Card>
@@ -104,7 +116,7 @@ export function AnalyzeScreen() {
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => setSelectedTables(copyable.map(t => t.name))}
+                onClick={() => setSelectedTables(selectable.map(t => t.name))}
               >
                 Tout
               </Button>
@@ -119,7 +131,8 @@ export function AnalyzeScreen() {
           }
         />
         <ul className="grid gap-1">
-          {copyable.map(table => {
+          {selectable.map(table => {
+            const absent = !targetNames.has(table.name);
             const tablePlan = plan?.tables.find(t => t.table === table.name);
             const position = plan
               ? plan.order.order.indexOf(table.name) + 1
@@ -136,15 +149,22 @@ export function AnalyzeScreen() {
                   <span className="min-w-0 flex-1">
                     <span className="mono block truncate">{table.name}</span>
                     <span className="block text-xs text-[var(--st-text-soft)]">
-                      {tablePlan
-                        ? `${tablePlan.columns.length} colonne(s) · ${
-                            tablePlan.primaryKey.length > 0
-                              ? `clé ${tablePlan.primaryKey.join(', ')}`
-                              : 'sans clé primaire'
-                          } · ${tablePlan.mode === 'upsert' ? 'mise à jour' : 'insertion'}`
-                        : `${table.columns.length} colonne(s)`}
+                      {absent
+                        ? `${table.columns.length} colonne(s) · à créer dans la cible`
+                        : tablePlan
+                          ? `${tablePlan.columns.length} colonne(s) · ${
+                              tablePlan.primaryKey.length > 0
+                                ? `clé ${tablePlan.primaryKey.join(', ')}`
+                                : 'sans clé primaire'
+                            } · ${tablePlan.mode === 'upsert' ? 'mise à jour' : 'insertion'}`
+                          : `${table.columns.length} colonne(s)`}
                     </span>
                   </span>
+                  {absent ? (
+                    <Badge tone="warning" size="xs">
+                      à créer
+                    </Badge>
+                  ) : null}
                   {position > 0 ? (
                     <Badge tone="muted" size="xs">
                       #{position}
@@ -239,7 +259,24 @@ export function AnalyzeScreen() {
               ? `${levels.blocking} anomalie(s) bloquante(s) : la copie échouerait.`
               : 'Aucun écart bloquant entre les deux schémas.'
           }
+          action={
+            missingSelected.length > 0 ? (
+              <Link to="/structure">
+                <Button size="sm" variant="primary">
+                  <Boxes aria-hidden="true" size={16} />
+                  Créer la structure
+                </Button>
+              </Link>
+            ) : null
+          }
         />
+        {missingSelected.length > 0 ? (
+          <p className="mb-2 text-sm">
+            {formatNumber(missingSelected.length)} table(s) sélectionnée(s)
+            n'existent pas encore dans la cible. Créez la structure d'abord,
+            puis relancez l'analyse&nbsp;: elles deviendront remplissables.
+          </p>
+        ) : null}
         {issues.length === 0 && warnings.length === 0 ? (
           <p className="text-sm text-[var(--st-text-soft)]">
             Les colonnes de la sélection existent des deux côtés.

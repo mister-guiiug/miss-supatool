@@ -89,7 +89,10 @@ describe('buildCopyPlan', () => {
     expect(plan.issues.map(i => i.code)).toContain('column-missing');
   });
 
-  it('écarte du travail une table sans colonne commune', () => {
+  it('garde au plan une table absente de la cible, sans la rendre copiable', () => {
+    // Elle reste VISIBLE — l'écran de contenu doit pouvoir la montrer comme
+    // « à créer » — mais rien ne sera écrit tant qu'elle n'existe pas, et
+    // l'anomalie bloquante le dit.
     const plan = buildCopyPlan(
       input({
         sourceSchema: schema(table('a', ['id'])),
@@ -97,7 +100,9 @@ describe('buildCopyPlan', () => {
         selectedTables: ['a'],
       })
     );
+    expect(plan.tables.map(t => t.table)).toEqual(['a']);
     expect(copyableTables(plan)).toEqual([]);
+    expect(plan.issues.map(i => i.code)).toContain('table-missing');
   });
 
   it('remonte les cycles et les dépendances hors sélection en avertissements', () => {

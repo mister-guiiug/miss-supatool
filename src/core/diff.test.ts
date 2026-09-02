@@ -20,7 +20,7 @@ function table(
 }
 
 describe('diffTable', () => {
-  it('bloque quand la table manque à la cible', () => {
+  it('bloque quand la table manque à la cible, en disant comment la créer', () => {
     const issues = diffTable(
       table('clients', [column('id')], ['id']),
       undefined
@@ -28,6 +28,10 @@ describe('diffTable', () => {
     expect(issues).toHaveLength(1);
     expect(issues[0]?.code).toBe('table-missing');
     expect(hasBlocking(issues)).toBe(true);
+    // Le message oriente vers l'étape qui sait la créer : depuis que l'outil
+    // copie la structure, « appliquez vos migrations » n'est plus la seule
+    // issue, et ce n'est plus la première.
+    expect(issues[0]?.message).toMatch(/Structure/);
   });
 
   it('bloque sur une colonne absente de la cible', () => {

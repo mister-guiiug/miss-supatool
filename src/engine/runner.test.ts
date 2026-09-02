@@ -124,6 +124,38 @@ describe('runCopy', () => {
     expect(summary.tables).toHaveLength(1);
     expect(summary.tables[0]?.error).toContain('400');
     expect(summary.errorCount).toBe(1);
+    // Les lignes lues avant l'échec sont rapportées : un bilan à zéro ferait
+    // croire qu'une relance repart de rien.
+    expect(summary.tables[0]?.read).toBe(2);
+  });
+
+  it("rapporte ce qui a été écrit avant l'échec, pas zéro", async () => {
+    let posts = 0;
+    const set = build([
+      call => {
+        if (!call.url.startsWith(TARGET)) return undefined;
+        posts += 1;
+        // Le premier lot passe, le second est refusé.
+        return posts === 1 ? { status: 201 } : { status: 400, text: 'refus' };
+      },
+      call => (call.url.startsWith(SOURCE) ? { body: rows(1, 4) } : undefined),
+    ]);
+    const summary = await runCopy({
+      source: set.source,
+      target: set.target,
+      plan: plan([tablePlan('a')], {
+        options: {
+          ...DEFAULT_OPTIONS,
+          dryRun: false,
+          pageSize: 100,
+          batchSize: 2,
+        },
+      }),
+      emit: () => {},
+    });
+    expect(summary.tables[0]?.written).toBe(2);
+    expect(summary.tables[0]?.read).toBe(4);
+    expect(summary.tables[0]?.error).toContain('400');
   });
 
   it('poursuit et rapporte tout quand on ne lui demande pas de s’arrêter', async () => {

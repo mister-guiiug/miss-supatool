@@ -16,7 +16,7 @@
 import type { ProjectClient } from '../api/http.ts';
 import type { CopyPlan, SourceBucket } from '../core/plan.ts';
 import { describeError } from '../core/errors.ts';
-import { copyTable } from './copyTables.ts';
+import { copyTable, CopyTableError } from './copyTables.ts';
 import { copyBucket } from './copyStorage.ts';
 import type {
   BucketResult,
@@ -36,10 +36,12 @@ export interface RunCopyInput {
   emit: (event: CopyEvent) => void;
 }
 
+/** Une annulation reste une annulation, même emballée par `CopyTableError`. */
 function isAbort(error: unknown): boolean {
+  const cause = error instanceof CopyTableError ? error.cause : error;
   return (
-    error instanceof DOMException &&
-    (error.name === 'AbortError' || error.name === 'TimeoutError')
+    cause instanceof DOMException &&
+    (cause.name === 'AbortError' || cause.name === 'TimeoutError')
   );
 }
 
@@ -103,12 +105,14 @@ export async function runCopy(input: RunCopyInput): Promise<RunSummary> {
         aborted = true;
         break;
       }
-      const message = describeError(error);
+      // Ce qui a déjà été copié compte, même quand la table finit en erreur.
+      const partial = error instanceof CopyTableError ? error : undefined;
+      const message = describeError(partial ? partial.cause : error);
       tables.push({
         table: tablePlan.table,
-        read: 0,
-        written: 0,
-        durationMs: 0,
+        read: partial?.read ?? 0,
+        written: partial?.written ?? 0,
+        durationMs: partial?.durationMs ?? 0,
         error: message,
       });
       emit({ type: 'table-error', table: tablePlan.table, message });

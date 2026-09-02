@@ -36,6 +36,31 @@ export interface CopyTableOutcome {
   durationMs: number;
 }
 
+/**
+ * Un échec en cours de table, AVEC ce qui a déjà été fait.
+ *
+ * Sans elle, une table qui casse à la vingtième page est rapportée « 0 ligne
+ * écrite » alors que dix mille sont passées : l'utilisateur relancerait une
+ * copie en croyant repartir de zéro, et l'aurait cru même en lisant le
+ * rapport. La cause d'origine reste attachée (`cause`) pour que le message et
+ * la détection d'annulation continuent de fonctionner.
+ */
+export class CopyTableError extends Error {
+  table: string;
+  read: number;
+  written: number;
+  durationMs: number;
+
+  constructor(table: string, partial: CopyTableOutcome, cause: unknown) {
+    super(`Échec pendant la copie de « ${table} »`, { cause });
+    this.name = 'CopyTableError';
+    this.table = table;
+    this.read = partial.read;
+    this.written = partial.written;
+    this.durationMs = partial.durationMs;
+  }
+}
+
 export async function copyTable(
   plan: TablePlan,
   context: CopyTableContext
@@ -67,51 +92,59 @@ export async function copyTable(
   let cursor: PageCursor | undefined;
   let useCursor = plan.strategy === 'keyset' && plan.orderBy.length === 1;
 
-  for (;;) {
-    if (signal?.aborted) break;
+  try {
+    for (;;) {
+      if (signal?.aborted) break;
 
-    const rows = await readPage(source, plan.table, {
-      columns: plan.columns,
-      orderBy: plan.orderBy,
-      limit: options.pageSize,
-      ...(useCursor ? (cursor ? { after: cursor } : {}) : { offset }),
-      schema,
-      ...(signal ? { signal } : {}),
-    });
-    if (rows.length === 0) break;
-    read += rows.length;
+      const rows = await readPage(source, plan.table, {
+        columns: plan.columns,
+        orderBy: plan.orderBy,
+        limit: options.pageSize,
+        ...(useCursor ? (cursor ? { after: cursor } : {}) : { offset }),
+        schema,
+        ...(signal ? { signal } : {}),
+      });
+      if (rows.length === 0) break;
+      read += rows.length;
 
-    if (!options.dryRun) {
-      for (const batch of chunk(rows, options.batchSize)) {
-        if (signal?.aborted) break;
-        await writeRows(target, plan.table, batch, {
-          mode: plan.mode,
-          ...(plan.onConflict ? { onConflict: plan.onConflict } : {}),
-          schema,
-          ...(signal ? { signal } : {}),
-        });
-        written += batch.length;
+      if (!options.dryRun) {
+        for (const batch of chunk(rows, options.batchSize)) {
+          if (signal?.aborted) break;
+          await writeRows(target, plan.table, batch, {
+            mode: plan.mode,
+            ...(plan.onConflict ? { onConflict: plan.onConflict } : {}),
+            schema,
+            ...(signal ? { signal } : {}),
+          });
+          written += batch.length;
+        }
       }
-    }
 
-    emit({ type: 'table-progress', table: plan.table, read, written });
+      emit({ type: 'table-progress', table: plan.table, read, written });
 
-    if (rows.length < options.pageSize) break;
+      if (rows.length < options.pageSize) break;
 
-    if (useCursor) {
-      const last = rows[rows.length - 1];
-      const column = plan.orderBy[0];
-      const next = last && column ? cursorValue(last, column) : null;
-      if (next === null) {
-        // Repli explicite : on repart en décalage là où on en est.
-        useCursor = false;
-        offset = read;
+      if (useCursor) {
+        const last = rows[rows.length - 1];
+        const column = plan.orderBy[0];
+        const next = last && column ? cursorValue(last, column) : null;
+        if (next === null) {
+          // Repli explicite : on repart en décalage là où on en est.
+          useCursor = false;
+          offset = read;
+        } else {
+          cursor = { column: column ?? '', value: next };
+        }
       } else {
-        cursor = { column: column ?? '', value: next };
+        offset = read;
       }
-    } else {
-      offset = read;
     }
+  } catch (error) {
+    throw new CopyTableError(
+      plan.table,
+      { read, written, durationMs: Date.now() - startedAt },
+      error
+    );
   }
 
   return { read, written, durationMs: Date.now() - startedAt };

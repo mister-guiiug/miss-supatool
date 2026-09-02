@@ -108,8 +108,63 @@ describe('applyStatements', () => {
     expect(applySummary(results)).toEqual({
       applied: 2,
       failed: 1,
+      notAttempted: 0,
       retried: 0,
     });
+  });
+
+  it('arrête tout au premier refus de droits, sans seconde passe', async () => {
+    // Constaté en vrai : treize instructions, treize fois le même 403 « votre
+    // compte n'a pas les privilèges », puis treize de plus en seconde passe.
+    // Un refus de droits ne dépend pas de l'instruction : le rejouer est du
+    // bruit, et le rejouer DEUX fois est du bruit payant.
+    const set = build([
+      () => ({
+        status: 403,
+        body: {
+          message:
+            'Your account does not have the necessary privileges to access this endpoint.',
+        },
+      }),
+    ]);
+    const results = await applyStatements(set.client, 'abc', [
+      statement('a'),
+      statement('b'),
+      statement('c'),
+    ]);
+
+    expect(results.map(r => r.status)).toEqual([
+      'failed',
+      'not-attempted',
+      'not-attempted',
+    ]);
+    // Un seul appel : ni les suivantes, ni la seconde passe.
+    expect(set.fake.calls).toHaveLength(1);
+    // Et le message dit quoi faire, au lieu de recopier l'anglais de l'API.
+    expect(results[0]?.message).toMatch(/Owner ou Administrator/);
+    expect(results[0]?.message).toMatch(/éditeur SQL/);
+    expect(applySummary(results)).toMatchObject({
+      applied: 0,
+      failed: 1,
+      notAttempted: 2,
+    });
+  });
+
+  it("n'arrête pas tout sur une erreur SQL ordinaire", async () => {
+    let seen = 0;
+    const set = build([
+      () => {
+        seen += 1;
+        return seen === 1
+          ? { status: 400, text: 'relation inconnue' }
+          : { status: 201, body: [] };
+      },
+    ]);
+    const results = await applyStatements(set.client, 'abc', [
+      statement('a'),
+      statement('b'),
+    ]);
+    expect(results.map(r => r.status)).toEqual(['applied', 'applied']);
   });
 
   it('rattrape en seconde passe ce qu’un ordre statique ne pouvait pas savoir', async () => {

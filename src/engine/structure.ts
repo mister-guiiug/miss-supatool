@@ -19,8 +19,9 @@
  * une vraie erreur, et est rapporté comme telle.
  */
 
+import { ApiError } from '../api/http.ts';
 import type { ManagementClient } from '../api/management.ts';
-import { describeError } from '../core/errors.ts';
+import { describeError, isAuthorizationFailure } from '../core/errors.ts';
 import {
   EMPTY_ROWS,
   introspectionQueries,
@@ -67,7 +68,7 @@ export async function readStructure(
   return rows;
 }
 
-export type ApplyStatus = 'applied' | 'failed';
+export type ApplyStatus = 'applied' | 'failed' | 'not-attempted';
 
 export interface ApplyResult {
   statement: Statement;
@@ -95,9 +96,19 @@ export async function applyStatements(
   const results: ApplyResult[] = [];
   const failed: Statement[] = [];
   let done = 0;
+  /** Un refus de droits vaut pour toute la suite : on arrête là. */
+  let denied = false;
 
   for (const statement of statements) {
     if (options.signal?.aborted) break;
+    if (denied) {
+      results.push({
+        statement,
+        status: 'not-attempted',
+        message: 'Non tentée : le jeton ne peut pas exécuter de SQL ici.',
+      });
+      continue;
+    }
     options.onProgress?.(done, statements.length, statement);
     if (options.dryRun) {
       results.push({ statement, status: 'applied' });
@@ -115,12 +126,21 @@ export async function applyStatements(
         status: 'failed',
         message: describeError(error),
       });
-      failed.push(statement);
+      if (error instanceof ApiError && isAuthorizationFailure(error.status)) {
+        denied = true;
+      } else {
+        failed.push(statement);
+      }
     }
     done += 1;
   }
 
-  if ((options.secondPass ?? true) && failed.length > 0 && !options.dryRun) {
+  if (
+    (options.secondPass ?? true) &&
+    failed.length > 0 &&
+    !options.dryRun &&
+    !denied
+  ) {
     for (const statement of failed) {
       if (options.signal?.aborted) break;
       try {
@@ -145,11 +165,13 @@ export async function applyStatements(
 export function applySummary(results: readonly ApplyResult[]): {
   applied: number;
   failed: number;
+  notAttempted: number;
   retried: number;
 } {
   return {
     applied: results.filter(r => r.status === 'applied').length,
     failed: results.filter(r => r.status === 'failed').length,
+    notAttempted: results.filter(r => r.status === 'not-attempted').length,
     retried: results.filter(r => r.retried).length,
   };
 }

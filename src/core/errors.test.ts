@@ -20,6 +20,18 @@ describe('describeError', () => {
     );
   });
 
+  it('traduit le refus de droits de l’API de management en marche à suivre', () => {
+    const message = describeError(
+      new Error(
+        'HTTP 403 sur /v1/projects/abc/database/query — {"message":"Your account does not have the necessary privileges to access this endpoint. For more details, refer to our documentation https://supabase.com/docs/guides/platform/access-control"}'
+      )
+    );
+    // Le rôle attendu, et surtout l'issue : le SQL est téléchargeable.
+    expect(message).toMatch(/Owner ou Administrator/);
+    expect(message).toMatch(/éditeur SQL/);
+    expect(message).not.toMatch(/necessary privileges/);
+  });
+
   it('laisse passer un message applicatif, secrets masqués', () => {
     const jwt = `eyJhbGciOiJIUzI1NiJ9.${'a'.repeat(40)}.${'b'.repeat(30)}`;
     const message = describeError(new Error(`HTTP 401 avec ${jwt}`));

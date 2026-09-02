@@ -70,6 +70,7 @@ export function StructureScreen() {
   const counts = countByPhase(statements);
   const failed = results.filter(r => r.status === 'failed');
   const applied = results.filter(r => r.status === 'applied');
+  const notAttempted = results.filter(r => r.status === 'not-attempted');
 
   return (
     <div className="grid gap-4 py-4">
@@ -243,13 +244,18 @@ export function StructureScreen() {
 
             {results.length > 0 ? (
               <div className="mt-3 grid gap-2">
-                <p className="text-sm">
+                <p className="flex flex-wrap gap-1 text-sm">
                   <Badge tone="success" size="xs">
                     {formatNumber(applied.length)} appliquée(s)
-                  </Badge>{' '}
+                  </Badge>
                   {failed.length > 0 ? (
                     <Badge tone="danger" size="xs">
                       {formatNumber(failed.length)} en échec
+                    </Badge>
+                  ) : null}
+                  {notAttempted.length > 0 ? (
+                    <Badge tone="muted" size="xs">
+                      {formatNumber(notAttempted.length)} non tentée(s)
                     </Badge>
                   ) : null}
                 </p>
@@ -265,6 +271,13 @@ export function StructureScreen() {
                       </li>
                     ))}
                   </ul>
+                ) : null}
+                {notAttempted.length > 0 ? (
+                  <p className="text-sm text-[var(--st-text-soft)]">
+                    L'exécution s'est arrêtée au premier refus de droits&nbsp;:
+                    les instructions suivantes auraient reçu la même réponse.
+                    Rien n'a été laissé à moitié fait de ce côté-là.
+                  </p>
                 ) : null}
               </div>
             ) : null}

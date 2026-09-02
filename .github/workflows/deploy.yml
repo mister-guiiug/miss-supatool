@@ -17,3 +17,8 @@ jobs:
     secrets: inherit
     with:
       use-base-path: true
+      # URL du relais vers l'API de management (voir proxy/README.md), posée en
+      # variable de dépôt `SUPABASE_PROXY_URL`. Vide = création de projet et
+      # copie de structure indisponibles sur le site publié ; la copie des
+      # données, elle, n'en dépend pas.
+      build-env: VITE_SUPABASE_PROXY=${{ vars.SUPABASE_PROXY_URL }}

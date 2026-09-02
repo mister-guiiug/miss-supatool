@@ -1,0 +1,10 @@
+name = "supatool-management-proxy"
+main = "worker.ts"
+compatibility_date = "2026-01-01"
+
+# Les origines autorisées à se servir du relais. EN REFUS PAR DÉFAUT : vider
+# cette liste ferme le relais à tout le monde, ce n'est pas un joker.
+# Ajoutez le port de votre serveur de développement si vous voulez l'utiliser
+# depuis `npm run dev` sans passer par le proxy Vite intégré.
+[vars]
+ALLOWED_ORIGINS = "https://mister-guiiug.github.io"

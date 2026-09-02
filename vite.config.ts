@@ -30,6 +30,29 @@ export default defineConfig(({ command }) => {
 
   return {
     base: basePath,
+    server: {
+      proxy: {
+        // Relais de développement vers l'API de management.
+        //
+        // `api.supabase.com` n'accorde le CORS qu'à `supabase.com` : créer un
+        // projet ou exécuter du DDL depuis la page est impossible sans
+        // intermédiaire. En production c'est le Worker de `proxy/` ; en local
+        // c'est ce proxy-ci, pour n'avoir RIEN à déployer avant d'essayer.
+        //
+        // Même convention d'appel que le Worker (`?path=/v1/…`), pour que le
+        // client soit strictement le même code dans les deux cas.
+        '/__supabase-management': {
+          target: 'https://api.supabase.com',
+          changeOrigin: true,
+          rewrite: received => {
+            const mark = received.indexOf('?');
+            const search = mark === -1 ? '' : received.slice(mark + 1);
+            const path = new URLSearchParams(search).get('path');
+            return path && path.startsWith('/v1/') ? path : '/v1';
+          },
+        },
+      },
+    },
     define: {
       __APP_VERSION__: JSON.stringify(version),
       __APP_BUILD_ID__: JSON.stringify(buildId),

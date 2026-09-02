@@ -10,10 +10,68 @@ import {
   formatDuration,
   formatNumber,
 } from '@mister-guiiug/dev-wpa-config/format';
-import { Download, FileClock } from 'lucide-react';
+import { Download, FileClock, ListRestart } from 'lucide-react';
 import { redactDeep } from '../../core/redact.ts';
 import { totalObjects, totalRows } from '../../engine/events.ts';
 import { useStore } from '../../store/useStore.ts';
+import { useManagementStore } from '../../store/useManagementStore.ts';
+
+/**
+ * Le rattrapage des séquences, là où il se remarque : juste après une copie
+ * réelle.
+ *
+ * Les lignes ont été insérées avec leurs identifiants, mais la séquence de la
+ * cible est restée à 1 : la première insertion applicative entrerait en
+ * conflit. Le README l'expliquait ; maintenant que l'application sait exécuter
+ * du SQL, elle peut le faire.
+ */
+function SequenceReset() {
+  const available = useManagementStore(s => s.available);
+  const token = useManagementStore(s => s.token);
+  const applying = useManagementStore(s => s.applying);
+  const results = useManagementStore(s => s.results);
+  const error = useManagementStore(s => s.structureError);
+  const resetSequences = useManagementStore(s => s.resetSequences);
+  if (!available) return null;
+
+  const done = results.filter(r => r.statement.phase === 'sequence');
+
+  return (
+    <Card as="section">
+      <CardHeader
+        as="h2"
+        title="Séquences de la cible"
+        subtitle="À faire après une copie réelle : sans cela, la première insertion de votre application entrerait en conflit."
+      />
+      <Button
+        variant="outline"
+        loading={applying}
+        aria-disabled={token.trim() === ''}
+        onClick={() => {
+          if (token.trim() !== '') void resetSequences();
+        }}
+      >
+        <ListRestart aria-hidden="true" size={18} />
+        Remettre les séquences à niveau
+      </Button>
+      {token.trim() === '' ? (
+        <p className="mt-2 text-xs text-[var(--st-text-soft)]">
+          Demande le jeton d'accès personnel, saisi dans l'écran Structure.
+        </p>
+      ) : null}
+      {done.length > 0 ? (
+        <p className="mt-2 text-sm text-[var(--st-text-soft)]">
+          {formatNumber(done.length)} séquence(s) traitée(s).
+        </p>
+      ) : null}
+      {error ? (
+        <p role="alert" className="mt-2 text-sm text-[var(--st-danger)]">
+          {error}
+        </p>
+      ) : null}
+    </Card>
+  );
+}
 
 export function ReportScreen() {
   const summary = useStore(s => s.summary);
@@ -149,6 +207,8 @@ export function ReportScreen() {
           </ul>
         </Card>
       ) : null}
+
+      {summary.dryRun ? null : <SequenceReset />}
 
       <Button variant="outline" block onClick={onDownload}>
         <Download aria-hidden="true" size={18} />

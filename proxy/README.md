@@ -44,6 +44,17 @@ standard uniquement, testé avec le reste de l'application
 ([`handler.test.ts`](../src/proxy/handler.test.ts)). Le porter sur Deno Deploy,
 Netlify ou Vercel Edge revient à réécrire les cinq lignes de `worker.ts`.
 
+## Instance en service
+
+Le site publié utilise **`https://supatool-management-proxy.mister-guiiug.workers.dev`**
+(déployé le 02/09/2026, `ALLOWED_ORIGINS = https://mister-guiiug.github.io`),
+désigné par la variable de dépôt `SUPABASE_PROXY_URL`.
+
+Les garde-fous y ont été éprouvés en production : requête sans `Origin` → 403 ·
+origine inconnue → 403 · sans jeton → 401 · `DELETE` sur un projet → 403 · URL
+absolue en `path` → 400 · préflet → 204 · appel légitime → la réponse de
+Supabase, telle quelle.
+
 ## Déploiement (Cloudflare)
 
 ```bash
@@ -51,6 +62,10 @@ cd proxy
 npx wrangler login
 npx wrangler deploy
 ```
+
+Avec un jeton d'API plutôt qu'une connexion interactive :
+`CLOUDFLARE_API_TOKEN` (permission « Workers Scripts: Edit ») et
+`CLOUDFLARE_ACCOUNT_ID` dans l'environnement.
 
 Ajustez `ALLOWED_ORIGINS` dans [`wrangler.toml`](./wrangler.toml) **avant** de
 déployer : seules les origines qui y figurent pourront s'en servir. Pour un

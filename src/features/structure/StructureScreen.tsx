@@ -9,7 +9,15 @@ import { TextField } from '@mister-guiiug/dev-wpa-config/react/field';
 import { ConfirmDialog } from '@mister-guiiug/dev-wpa-config/react/confirm-dialog';
 import { downloadText, dateSlug } from '@mister-guiiug/dev-wpa-config/download';
 import { formatNumber } from '@mister-guiiug/dev-wpa-config/format';
-import { Boxes, CircleStop, Download, Hammer, ScanSearch } from 'lucide-react';
+import {
+  Boxes,
+  CircleStop,
+  Download,
+  Hammer,
+  ScanSearch,
+  Stethoscope,
+} from 'lucide-react';
+import { probeLabel } from '../../core/diagnostics.ts';
 import {
   countByPhase,
   PHASE_LABELS,
@@ -37,6 +45,10 @@ export function StructureScreen() {
   const dryRun = useManagementStore(s => s.dryRun);
   const setDryRun = useManagementStore(s => s.setDryRun);
   const abort = useManagementStore(s => s.abort);
+  const probing = useManagementStore(s => s.probing);
+  const probes = useManagementStore(s => s.probes);
+  const diagnosis = useManagementStore(s => s.diagnosis);
+  const runDiagnostics = useManagementStore(s => s.runDiagnostics);
 
   const source = useStore(s => s.source);
   const target = useStore(s => s.target);
@@ -123,6 +135,55 @@ export function StructureScreen() {
           <p role="alert" className="mt-3 text-sm text-[var(--st-danger)]">
             {structureError}
           </p>
+        ) : null}
+      </Card>
+
+      <Card as="section">
+        <CardHeader
+          as="h2"
+          title="Droits du jeton"
+          subtitle="Quatre sondes — chaque projet, en lecture puis en écriture — avec une requête qui ne touche à rien."
+          action={
+            <Button
+              size="sm"
+              variant="outline"
+              loading={probing}
+              aria-disabled={token.trim() === ''}
+              onClick={() => {
+                if (token.trim() !== '') void runDiagnostics();
+              }}
+            >
+              <Stethoscope aria-hidden="true" size={16} />
+              Sonder
+            </Button>
+          }
+        />
+        <p className="text-sm text-[var(--st-text-soft)]">
+          Quand l'API refuse, son message ne dit pas si c'est le projet ou le
+          mode qui motive le refus. Ces quatre mesures le disent.
+        </p>
+        {probes.length > 0 ? (
+          <ul className="mt-3 grid gap-1 text-sm">
+            {probes.map(probe => (
+              <li
+                key={`${probe.side}-${probe.mode}`}
+                className="flex items-center gap-2"
+              >
+                <Badge tone={probe.ok ? 'success' : 'danger'} size="xs">
+                  {probe.ok ? 'OK' : (probe.status ?? '—')}
+                </Badge>
+                <span className="min-w-0 flex-1">{probeLabel(probe)}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {diagnosis ? (
+          <div className="mt-3 grid gap-1 text-sm">
+            <p className="font-medium">{diagnosis.conclusion}</p>
+            {diagnosis.advice ? (
+              <p className="text-[var(--st-text-soft)]">{diagnosis.advice}</p>
+            ) : null}
+          </div>
         ) : null}
       </Card>
 

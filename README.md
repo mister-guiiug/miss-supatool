@@ -81,6 +81,10 @@ DDL passent par elle. Il faut donc un intermédiaire — et il est fourni :
 | **En local** (`npm run dev`)               | **Rien.** Le serveur Vite relaie déjà.                                                 |
 | **Sur GitHub Pages** ou tout site statique | Déployer le Worker de [`proxy/`](./proxy/README.md), puis poser `VITE_SUPABASE_PROXY`. |
 
+Le site publié a le sien depuis le 02/09/2026 : toutes les étapes y sont donc
+actives. Sur un déploiement sans relais, la création de projet et la copie de
+structure s'annoncent indisponibles, et la copie de données continue seule.
+
 Le relais est sans état, cible verrouillée sur `api.supabase.com`, chemins et
 origines sur liste blanche en **refus par défaut**, et ne connaît **aucune
 méthode de suppression**. Le jeton ne fait que le traverser.

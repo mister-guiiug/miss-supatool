@@ -21,7 +21,15 @@ import {
   type Project,
   type ProjectStatus,
 } from '../api/management.ts';
+import { ApiError } from '../api/http.ts';
 import { MANAGEMENT_AVAILABLE, PROXY_BASE } from '../api/managementBase.ts';
+import {
+  diagnose,
+  PROBES,
+  PROBE_SQL,
+  type Diagnosis,
+  type ProbeOutcome,
+} from '../core/diagnostics.ts';
 import { describeError } from '../core/errors.ts';
 import { normalizeProjectUrl } from '../core/project.ts';
 import {
@@ -71,7 +79,12 @@ export interface ManagementState {
   /** Simulation : les instructions sont produites, aucune n'est envoyée. */
   dryRun: boolean;
 
+  probing: boolean;
+  probes: ProbeOutcome[];
+  diagnosis?: Diagnosis;
+
   setToken: (token: string) => void;
+  runDiagnostics: () => Promise<void>;
   togglePhase: (phase: StructurePhase) => void;
   setDryRun: (dryRun: boolean) => void;
   loadOrganizations: () => Promise<void>;
@@ -125,7 +138,62 @@ export const useManagementStore = create<ManagementState>()((set, get) => ({
   results: [],
   dryRun: true,
 
+  probing: false,
+  probes: [],
+
   setToken: token => set({ token, organizationsError: undefined }),
+
+  /**
+   * Quatre sondes, chaque projet et chaque mode, la même requête anodine.
+   *
+   * Un refus de l'API ne dit pas ce qui, du projet ou du mode, le motive :
+   * quand les deux ont changé entre l'appel qui marche et celui qui échoue, il
+   * n'y a rien à déduire. Mesurer les quatre cases sépare les variables en
+   * quatre requêtes, sans que personne ait à sortir son jeton dans un terminal.
+   */
+  runDiagnostics: async () => {
+    const sourceRef = refOf(useStore.getState().source.url);
+    const targetRef = refOf(useStore.getState().target.url);
+    set({ probing: true, probes: [], diagnosis: undefined });
+    abortController = new AbortController();
+    const probes: ProbeOutcome[] = [];
+    try {
+      const client = clientOrThrow(get().token);
+      for (const probe of PROBES) {
+        const ref = probe.side === 'source' ? sourceRef : targetRef;
+        if (!ref) {
+          probes.push({
+            ...probe,
+            ok: false,
+            message:
+              "Projet non identifiable par sa référence : l'API de management ne le connaît pas.",
+          });
+          continue;
+        }
+        try {
+          await client.runQuery(ref, PROBE_SQL, {
+            readOnly: probe.mode === 'read',
+            signal: abortController.signal,
+          });
+          probes.push({ ...probe, ok: true });
+        } catch (error) {
+          probes.push({
+            ...probe,
+            ok: false,
+            ...(error instanceof ApiError ? { status: error.status } : {}),
+            message: describeError(error),
+          });
+        }
+        set({ probes: [...probes] });
+      }
+      set({ diagnosis: diagnose(probes) });
+    } catch (error) {
+      set({ structureError: describeError(error) });
+    } finally {
+      set({ probing: false });
+      abortController = undefined;
+    }
+  },
 
   setDryRun: dryRun => set({ dryRun }),
 

@@ -1,0 +1,14 @@
+{
+  "name": "supatool-management-proxy",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Relais sans état vers l'API de management de Supabase, pour Miss Supatool.",
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

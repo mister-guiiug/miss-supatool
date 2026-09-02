@@ -75,21 +75,85 @@ export interface RequestOptions {
   noRetry?: boolean;
 }
 
+export interface RetryPolicy {
+  fetchImpl: typeof fetch;
+  retries: number;
+  timeoutMs: number;
+}
+
+/**
+ * L'envoi, avec délai maximal et reprises — partagé par les deux clients (API
+ * de projet et API de management). Extrait pour n'avoir qu'un seul endroit où
+ * se trompe la politique de reprise.
+ */
+export async function sendWithRetry(
+  url: string,
+  init: {
+    method: string;
+    headers: Record<string, string>;
+    body?: BodyInit | null;
+    signal?: AbortSignal;
+  },
+  policy: RetryPolicy,
+  noRetry = false
+): Promise<Response> {
+  const attempts = noRetry ? 1 : policy.retries + 1;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const timeout = new AbortController();
+    const timer = setTimeout(() => {
+      timeout.abort(new DOMException('Délai dépassé', 'TimeoutError'));
+    }, policy.timeoutMs);
+    const onAbort = (): void => {
+      timeout.abort(init.signal?.reason);
+    };
+    init.signal?.addEventListener('abort', onAbort, { once: true });
+
+    try {
+      const response = await policy.fetchImpl(url, {
+        method: init.method,
+        headers: init.headers,
+        body: init.body ?? null,
+        signal: timeout.signal,
+      });
+      if (response.ok || !RETRYABLE_STATUS.has(response.status)) {
+        return response;
+      }
+      if (attempt === attempts - 1) return response;
+      await sleep(retryAfterDelay(response) ?? backoffDelay(attempt));
+    } catch (error) {
+      // Une annulation VOULUE ne se reprend pas : elle remonte telle quelle.
+      if (init.signal?.aborted) throw error;
+      lastError = error;
+      if (attempt === attempts - 1) throw error;
+      await sleep(backoffDelay(attempt));
+    } finally {
+      clearTimeout(timer);
+      init.signal?.removeEventListener('abort', onAbort);
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('Échec de la requête');
+}
+
 export class ProjectClient {
   readonly base: string;
   private readonly key: string;
   private readonly readOnly: boolean;
-  private readonly fetchImpl: typeof fetch;
-  private readonly retries: number;
-  private readonly timeoutMs: number;
+  private readonly policy: RetryPolicy;
 
   constructor(options: ProjectClientOptions) {
     this.base = options.base.replace(/\/+$/, '');
     this.key = options.key;
     this.readOnly = options.readOnly ?? false;
-    this.fetchImpl = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
-    this.retries = options.retries ?? 3;
-    this.timeoutMs = options.timeoutMs ?? 60_000;
+    this.policy = {
+      fetchImpl: options.fetchImpl ?? globalThis.fetch.bind(globalThis),
+      retries: options.retries ?? 3,
+      timeoutMs: options.timeoutMs ?? 60_000,
+    };
   }
 
   /**
@@ -100,52 +164,21 @@ export class ProjectClient {
     const method = (options.method ?? 'GET').toUpperCase();
     if (this.readOnly) assertReadOnly(method, path);
 
-    const headers: Record<string, string> = {
-      apikey: this.key,
-      authorization: `Bearer ${this.key}`,
-      ...options.headers,
-    };
-
-    const attempts = options.noRetry ? 1 : this.retries + 1;
-    let lastError: unknown;
-
-    for (let attempt = 0; attempt < attempts; attempt += 1) {
-      const timeout = new AbortController();
-      const timer = setTimeout(() => {
-        timeout.abort(new DOMException('Délai dépassé', 'TimeoutError'));
-      }, this.timeoutMs);
-      const onAbort = (): void => {
-        timeout.abort(options.signal?.reason);
-      };
-      options.signal?.addEventListener('abort', onAbort, { once: true });
-
-      try {
-        const response = await this.fetchImpl(`${this.base}${path}`, {
-          method,
-          headers,
-          body: options.body ?? null,
-          signal: timeout.signal,
-        });
-        if (response.ok || !RETRYABLE_STATUS.has(response.status)) {
-          return response;
-        }
-        if (attempt === attempts - 1) return response;
-        await sleep(retryAfterDelay(response) ?? backoffDelay(attempt));
-      } catch (error) {
-        // Une annulation VOULUE ne se reprend pas : elle remonte telle quelle.
-        if (options.signal?.aborted) throw error;
-        lastError = error;
-        if (attempt === attempts - 1) throw error;
-        await sleep(backoffDelay(attempt));
-      } finally {
-        clearTimeout(timer);
-        options.signal?.removeEventListener('abort', onAbort);
-      }
-    }
-
-    throw lastError instanceof Error
-      ? lastError
-      : new Error('Échec de la requête');
+    return sendWithRetry(
+      `${this.base}${path}`,
+      {
+        method,
+        headers: {
+          apikey: this.key,
+          authorization: `Bearer ${this.key}`,
+          ...options.headers,
+        },
+        body: options.body ?? null,
+        ...(options.signal ? { signal: options.signal } : {}),
+      },
+      this.policy,
+      options.noRetry ?? false
+    );
   }
 
   /** Requête attendue en JSON ; lève `ApiError` sur réponse non 2xx. */

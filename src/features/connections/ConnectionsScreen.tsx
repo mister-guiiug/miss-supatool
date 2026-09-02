@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { checkConnection, isSameProject } from '../../core/project.ts';
 import { useStore, type Connection } from '../../store/useStore.ts';
+import { CreateProjectCard } from './CreateProjectCard.tsx';
 
 /**
  * La prop s'appelle `side` et non `role` : `role` sur un composant JSX est lu
@@ -150,17 +151,15 @@ export function ConnectionsScreen() {
       <Card as="section">
         <CardHeader
           as="h2"
-          title="Copier un projet Supabase vers un autre"
-          subtitle="Les lignes de vos tables et les fichiers de vos seaux, d'un projet à l'autre, depuis ce navigateur."
+          title="Migrer un projet Supabase vers un autre"
+          subtitle="La structure de la base, les lignes de vos tables et les fichiers de vos seaux, d'un projet à l'autre, depuis ce navigateur."
         />
         <p className="text-sm text-[var(--st-text-soft)]">
-          Miss Supatool copie des <strong>données</strong>. Elle ne crée ni
-          tables, ni contraintes, ni politiques&nbsp;RLS, ni fonctions&nbsp;: le
-          projet cible doit déjà porter le même schéma — par vos migrations,
-          par&nbsp;
-          <span className="mono">supabase db push</span>, ou par un export de
-          structure. L'écran suivant vérifie cette correspondance avant d'écrire
-          quoi que ce soit.
+          Trois temps&nbsp;: brancher les deux projets, recopier la{' '}
+          <strong>structure</strong> (tables, contraintes, index, politiques
+          RLS…), puis verser les <strong>données</strong> et les fichiers. Si le
+          projet cible n'existe pas encore, Miss Supatool peut le créer. Chaque
+          étape se simule avant de s'exécuter.
         </p>
       </Card>
 
@@ -169,6 +168,8 @@ export function ConnectionsScreen() {
         title="Projet source"
         subtitle="Lu, jamais modifié — l'outil refuse toute écriture vers lui."
       />
+      <CreateProjectCard />
+
       <ConnectionCard
         side="target"
         title="Projet cible"

@@ -185,9 +185,11 @@ export const useManagementStore = create<ManagementState>()((set, get) => ({
 
       set({
         createdProject: ready,
-        creationStep: serviceKey
-          ? 'Projet prêt, connexion cible renseignée.'
-          : "Projet prêt. La clé de service n'a pas pu être lue : collez-la à la main.",
+        creationStep: !serviceKey
+          ? "Projet prêt. La clé de service n'a pas pu être lue : collez-la à la main."
+          : serviceKey.startsWith('sb_secret_')
+            ? 'Projet prêt. Ce projet n’expose qu’une clé « sb_secret_… » : si les appels échouent, remplacez-la par la clé service_role (Settings → API).'
+            : 'Projet prêt, connexion cible renseignée.',
       });
     } catch (error) {
       set({ creationError: describeError(error), creationStep: undefined });

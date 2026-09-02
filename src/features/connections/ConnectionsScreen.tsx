@@ -38,6 +38,13 @@ function RoleBadge({
       </Badge>
     );
   }
+  if (info?.role === 'secret') {
+    return (
+      <Badge tone="warning" icon={<ShieldAlert aria-hidden="true" size={14} />}>
+        clé secrète (nouveau format)
+      </Badge>
+    );
+  }
   if (info?.role === 'anon' || info?.role === 'publishable') {
     return (
       <Badge tone="warning" icon={<ShieldAlert aria-hidden="true" size={14} />}>

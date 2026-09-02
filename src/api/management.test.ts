@@ -77,22 +77,35 @@ describe('ManagementClient', () => {
 });
 
 describe('pickServiceKey', () => {
-  it('préfère la clé nouvelle génération', () => {
+  it('préfère la clé service_role, même quand la nouvelle existe', () => {
+    // Constaté sur un projet réellement créé par l'application : la connexion
+    // renseignée avec la clé `sb_secret_…` ne fonctionnait pas, celle avec la
+    // clé `service_role` du même projet, si. L'ordre inverse était un pari sur
+    // l'équivalence des deux formats ; il est perdu.
     expect(
       pickServiceKey([
-        { name: 'service_role', type: 'legacy', api_key: 'ancienne' },
-        { name: 'default', type: 'secret', api_key: 'nouvelle' },
-      ])
-    ).toBe('nouvelle');
-  });
-
-  it('retombe sur la clé historique', () => {
-    expect(
-      pickServiceKey([
-        { name: 'anon', type: 'legacy', api_key: 'publique' },
+        { name: 'default', type: 'secret', api_key: 'sb_secret_nouvelle' },
         { name: 'service_role', type: 'legacy', api_key: 'ancienne' },
       ])
     ).toBe('ancienne');
+  });
+
+  it('retombe sur la clé nouveau format quand elle est seule', () => {
+    expect(
+      pickServiceKey([
+        { name: 'anon', type: 'legacy', api_key: 'publique' },
+        { name: 'default', type: 'secret', api_key: 'sb_secret_nouvelle' },
+      ])
+    ).toBe('sb_secret_nouvelle');
+  });
+
+  it('ne prend jamais une clé publique', () => {
+    expect(
+      pickServiceKey([
+        { name: 'anon', type: 'legacy', api_key: 'publique' },
+        { name: 'default', type: 'publishable', api_key: 'sb_publishable_x' },
+      ])
+    ).toBeUndefined();
   });
 
   it('rend undefined quand rien ne convient', () => {

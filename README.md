@@ -107,6 +107,12 @@ méthode de suppression**. Le jeton ne fait que le traverser.
   dans le journal comme dans le rapport exporté.
 - Une clé `service_role` contourne la RLS et ouvre toute la base. Utilisez-la
   depuis un appareil de confiance, et révoquez-la si un doute subsiste.
+- **Deux formats de clé secrète coexistent**, et ils ne sont pas
+  interchangeables : la clé historique `service_role` (un JWT) est celle que
+  l'outil prend et celle qu'il faut coller. Une clé nouveau format
+  (`sb_secret_…`) est acceptée en repli, mais signalée — vérifié sur un projet
+  neuf, elle ne fonctionnait pas là où la `service_role` du même projet
+  fonctionnait.
 
 ## Marche à suivre
 

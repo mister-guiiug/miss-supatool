@@ -13,7 +13,15 @@
  * n'accorde aucun droit — c'est le serveur qui tranche.
  */
 
-export type KeyRole = 'service_role' | 'anon' | 'publishable' | 'unknown';
+/**
+ * `service_role` est la clé historique (un JWT) ; `secret` est son équivalent
+ * nouveau format (`sb_secret_…`). Les deux ouvrent la base, mais elles sont
+ * distinguées ici parce qu'elles ne sont PAS interchangeables en pratique :
+ * une clé `sb_secret_…` n'a pas fonctionné sur un projet neuf, là où la clé
+ * `service_role` du même projet fonctionnait.
+ */
+export type KeyRole =
+  'service_role' | 'secret' | 'anon' | 'publishable' | 'unknown';
 
 export interface KeyInfo {
   role: KeyRole;
@@ -44,7 +52,7 @@ function decodeJwtPayload(token: string): Record<string, unknown> | undefined {
 
 export function inspectKey(rawKey: string): KeyInfo {
   const key = rawKey.trim();
-  if (key.startsWith('sb_secret_')) return { role: 'service_role' };
+  if (key.startsWith('sb_secret_')) return { role: 'secret' };
   if (key.startsWith('sb_publishable_')) return { role: 'publishable' };
 
   const payload = decodeJwtPayload(key);
@@ -145,6 +153,10 @@ export function checkConnection(
       role === 'source'
         ? "Cette clé est PUBLIQUE (anon) : la lecture passera par la RLS et ne verra qu'une partie des lignes, sans le dire. Utilisez la clé « service_role »."
         : "Cette clé est PUBLIQUE (anon) : l'écriture sera refusée par la RLS sur la plupart des tables. Utilisez la clé « service_role »."
+    );
+  } else if (keyInfo.role === 'secret') {
+    warnings.push(
+      "Clé « secrète » nouveau format (sb_secret_…). Elle ouvre bien la base, mais elle n'est pas acceptée partout où l'ancienne l'est : si les appels échouent, prenez la clé « service_role » du même projet (Settings → API)."
     );
   } else if (keyInfo.role === 'unknown') {
     warnings.push(

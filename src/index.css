@@ -1,0 +1,124 @@
+@import 'tailwindcss';
+@import '@mister-guiiug/dev-wpa-config/tailwind-preset.css';
+/* Habillage partagé des composants [data-dwc] du socle (Button, Card, Field,
+   BottomNav, Toast, ConfirmDialog, EmptyState, Badge…). Tout y est en
+   `@layer components` : le CSS non layered de ce fichier l'emporte. */
+@import '@mister-guiiug/dev-wpa-config/components.css';
+
+/*
+ * Univers visuel : le vert Supabase sur des gris chauds. Sémantique constante
+ * dans toute l'app — vert = source / lecture, ambre = simulation, rouge =
+ * écriture réelle et destructions possibles.
+ */
+@theme {
+  --color-primary: #0f9d63;
+  --color-primary-soft: #d9f2e6;
+  --color-source: #2563eb;
+  --color-target: #b45309;
+  --radius-card: 0.875rem;
+}
+
+:root {
+  --st-bg: #f6faf8;
+  --st-surface: #ffffff;
+  --st-surface-2: #eef4f1;
+  --st-text: #10231b;
+  --st-text-soft: #4e6459;
+  --st-border: #d5e2db;
+  --st-ok: #0f9d63;
+  --st-warn: #b45309;
+  --st-danger: #be123c;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --st-bg: #0b1a14;
+  --st-surface: #12241c;
+  --st-surface-2: #183025;
+  --st-text: #e6f2ec;
+  --st-text-soft: #9db3a8;
+  --st-border: #234536;
+  --st-ok: #3ecf8e;
+  --st-warn: #f59e0b;
+  --st-danger: #fb7185;
+  color-scheme: dark;
+}
+
+/* Contrat des composants partagés : les jetons `--dwc-*` branchés une seule
+   fois sur les tokens de l'app. Ceux qui pointent un `--st-*` suivent le thème
+   sombre tout seuls. */
+:root {
+  --dwc-surface: var(--st-surface);
+  --dwc-surface-2: var(--st-surface-2);
+  --dwc-text: var(--st-text);
+  --dwc-text-soft: var(--st-text-soft);
+  --dwc-border: var(--st-border);
+  /* Contour d'un CONTRÔLE : WCAG 1.4.11 exige 3:1, que `--st-border` ne tient
+     pas en thème clair. `--st-text-soft` le tient dans les deux thèmes. */
+  --dwc-border-strong: var(--st-text-soft);
+  --dwc-primary: var(--st-ok);
+  --dwc-primary-contrast: #052b1c;
+  --dwc-primary-soft: color-mix(in srgb, var(--st-ok) 15%, var(--st-surface));
+  --dwc-success: var(--st-ok);
+  --dwc-warning: var(--st-warn);
+  --dwc-danger: var(--st-danger);
+  --dwc-radius: var(--radius-card);
+  --dwc-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+}
+
+[data-theme='dark'] {
+  --dwc-primary-contrast: #052b1c;
+  --dwc-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--st-bg);
+  color: var(--st-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Le contenu ne doit jamais passer sous la barre de navigation basse. */
+.app-main {
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+}
+
+/* `components.css` laisse volontairement la barre en `position: relative` :
+   c'est à l'app de décider où elle vit. Ici elle est collée au bas de la
+   fenêtre. Cette règle n'est pas layered, elle l'emporte donc sur le socle. */
+[data-dwc='bottom-nav'] {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 30;
+}
+
+/* Une monospace pour tout ce qui est identifiant technique : nom de table,
+   chemin de fichier, extrait de clé. */
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+}
+
+/* Barre d'avancement : un `progress` natif se style mal d'un navigateur à
+   l'autre, deux div suffisent et restent lisibles au lecteur d'écran grâce à
+   `role="progressbar"`. */
+.bar {
+  height: 0.375rem;
+  border-radius: 999px;
+  background: var(--st-surface-2);
+  overflow: hidden;
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  background: var(--st-ok);
+  transition: width 200ms linear;
+}

@@ -1,0 +1,61 @@
+{
+  "name": "miss-supatool",
+  "private": true,
+  "license": "MIT",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Miss Supatool — copie les données d'un projet Supabase vers un autre (tables via PostgREST, fichiers via l'API Storage). PWA locale : les clés ne quittent jamais le navigateur, aucun serveur intermédiaire.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build && pwa-bundle-budget",
+    "build:analyze": "cross-env ANALYZE=1 npm run build",
+    "preview": "vite preview --base /miss-supatool/",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "type-check": "tsc -b",
+    "icons": "pwa-icons --source public/favicon.svg --out public --maskable",
+    "prepare": "husky || true"
+  },
+  "bundleBudget": {
+    "totalGzipKb": 200
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,json,css,md,yml,yaml}": "prettier --write"
+  },
+  "devDependencies": {
+    "@mister-guiiug/dev-wpa-config": "^3.33.0",
+    "@tailwindcss/vite": "^4.3.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^24.12.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "cross-env": "^10.1.0",
+    "husky": "^9.1.7",
+    "jsdom": "^26.0.0",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.6.2",
+    "rollup-plugin-visualizer": "^7.0.1",
+    "sharp": "^0.34.5",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.0",
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^4.0.0"
+  },
+  "dependencies": {
+    "lucide-react": "^1.17.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^7.14.1",
+    "tailwindcss": "^4.2.2",
+    "zod": "^4.0.0",
+    "zustand": "^5.0.12"
+  }
+}

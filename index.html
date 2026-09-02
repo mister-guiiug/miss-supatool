@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      Anti-FOUC : applique le thème avant tout rendu. Lit les MÊMES clés que
+      `ThemeProvider` du socle (`react/theme-provider`), sinon le premier écran
+      s'affiche dans le mauvais thème puis bascule.
+    -->
+    <script>
+      (function () {
+        try {
+          var v = localStorage.getItem('dwc_theme');
+          var eff =
+            v === 'light' || v === 'dark'
+              ? v
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.setAttribute('data-theme', eff);
+          document.documentElement.style.colorScheme = eff;
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta id="meta-theme-color" name="theme-color" content="#0f9d63" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Miss Supatool" />
+    <link rel="apple-touch-icon" href="favicon.svg" />
+    <meta
+      name="description"
+      content="Copiez les données d'un projet Supabase vers un autre : tables via PostgREST, fichiers via l'API Storage. Tout se passe dans votre navigateur."
+    />
+    <title>Miss Supatool</title>
+    <!-- SEO/partage : __SEO_HOME_URL__ et __SEO_LOGO_URL__ sont remplis au
+         build par pwaSeoPlugin() (vite.config.ts). -->
+    <link rel="canonical" href="__SEO_HOME_URL__" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Miss Supatool" />
+    <meta
+      property="og:description"
+      content="Copiez les données d'un projet Supabase vers un autre : tables via PostgREST, fichiers via l'API Storage."
+    />
+    <meta property="og:url" content="__SEO_HOME_URL__" />
+    <meta property="og:image" content="__SEO_LOGO_URL__" />
+    <meta name="twitter:card" content="summary" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

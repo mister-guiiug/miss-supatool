@@ -1,0 +1,30 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  role="img"
+  aria-label="Miss Supatool"
+>
+  <rect width="64" height="64" rx="14" fill="#0b1a14" />
+  <!-- Deux « bases » (cylindres) reliées par une flèche : source → cible. -->
+  <g fill="none" stroke="#3ecf8e" stroke-width="3" stroke-linecap="round">
+    <ellipse cx="18" cy="20" rx="9" ry="4" />
+    <path d="M9 20v14c0 2.2 4 4 9 4s9-1.8 9-4V20" />
+    <ellipse cx="46" cy="30" rx="9" ry="4" />
+    <path d="M37 30v14c0 2.2 4 4 9 4s9-1.8 9-4V30" />
+  </g>
+  <path
+    d="M27 26h8"
+    fill="none"
+    stroke="#f6faf8"
+    stroke-width="3"
+    stroke-linecap="round"
+  />
+  <path
+    d="M31 22l4 4-4 4"
+    fill="none"
+    stroke="#f6faf8"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

@@ -27,7 +27,7 @@
     "*.{ts,tsx,js,mjs,json,css,md,yml,yaml}": "prettier --write"
   },
   "devDependencies": {
-    "@mister-guiiug/dev-wpa-config": "^3.33.0",
+    "@mister-guiiug/dev-wpa-config": "^3.34.0",
     "@tailwindcss/vite": "^4.3.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",

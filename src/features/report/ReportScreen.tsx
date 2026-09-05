@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom';
-import { Card, CardHeader } from '@mister-guiiug/dev-wpa-config/react/card';
-import { Button } from '@mister-guiiug/dev-wpa-config/react/button';
-import { Badge } from '@mister-guiiug/dev-wpa-config/react/badge';
-import { Stat } from '@mister-guiiug/dev-wpa-config/react/stat';
-import { EmptyState } from '@mister-guiiug/dev-wpa-config/react/empty-state';
-import { dateSlug, downloadJson } from '@mister-guiiug/dev-wpa-config/download';
+import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
+import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
+import { Badge } from '@mister-guiiug/dev-pwa-config/react/badge';
+import { Stat } from '@mister-guiiug/dev-pwa-config/react/stat';
+import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
+import { dateSlug, downloadJson } from '@mister-guiiug/dev-pwa-config/download';
 import {
   formatBytes,
   formatDuration,
   formatNumber,
-} from '@mister-guiiug/dev-wpa-config/format';
+} from '@mister-guiiug/dev-pwa-config/format';
 import { Download, FileClock, ListRestart } from 'lucide-react';
 import { redactDeep } from '../../core/redact.ts';
 import { totalObjects, totalRows } from '../../engine/events.ts';

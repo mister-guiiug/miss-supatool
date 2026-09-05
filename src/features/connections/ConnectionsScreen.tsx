@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader } from '@mister-guiiug/dev-wpa-config/react/card';
-import { Button } from '@mister-guiiug/dev-wpa-config/react/button';
-import { TextField } from '@mister-guiiug/dev-wpa-config/react/field';
-import { Badge } from '@mister-guiiug/dev-wpa-config/react/badge';
+import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
+import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
+import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
+import { Badge } from '@mister-guiiug/dev-pwa-config/react/badge';
 import {
   ArrowRight,
   Database,

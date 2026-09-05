@@ -4,8 +4,8 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { readFileSync } from 'node:fs';
-import { pwaSeoPlugin } from '@mister-guiiug/dev-wpa-config/vite-pwa-base';
-import { cspPlugin } from '@mister-guiiug/dev-wpa-config/vite-csp';
+import { pwaSeoPlugin } from '@mister-guiiug/dev-pwa-config/vite-pwa-base';
+import { cspPlugin } from '@mister-guiiug/dev-pwa-config/vite-csp';
 
 const analyze = process.env.ANALYZE === '1';
 const { version } = JSON.parse(readFileSync('./package.json', 'utf-8')) as {

@@ -1,9 +1,9 @@
 @import 'tailwindcss';
-@import '@mister-guiiug/dev-wpa-config/tailwind-preset.css';
+@import '@mister-guiiug/dev-pwa-config/tailwind-preset.css';
 /* Habillage partagé des composants [data-dwc] du socle (Button, Card, Field,
    BottomNav, Toast, ConfirmDialog, EmptyState, Badge…). Tout y est en
    `@layer components` : le CSS non layered de ce fichier l'emporte. */
-@import '@mister-guiiug/dev-wpa-config/components.css';
+@import '@mister-guiiug/dev-pwa-config/components.css';
 
 /*
  * Univers visuel : le vert Supabase sur des gris chauds. Sémantique constante

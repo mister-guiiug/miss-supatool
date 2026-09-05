@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Card, CardHeader } from '@mister-guiiug/dev-wpa-config/react/card';
-import { Button } from '@mister-guiiug/dev-wpa-config/react/button';
-import { Badge } from '@mister-guiiug/dev-wpa-config/react/badge';
-import { TextField } from '@mister-guiiug/dev-wpa-config/react/field';
-import { EmptyState } from '@mister-guiiug/dev-wpa-config/react/empty-state';
-import { SegmentedControl } from '@mister-guiiug/dev-wpa-config/react/segmented-control';
+import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
+import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
+import { Badge } from '@mister-guiiug/dev-pwa-config/react/badge';
+import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
+import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
+import { SegmentedControl } from '@mister-guiiug/dev-pwa-config/react/segmented-control';
 import {
   formatBytes,
   formatNumber,
-} from '@mister-guiiug/dev-wpa-config/format';
+} from '@mister-guiiug/dev-pwa-config/format';
 import { CircleStop, DatabaseZap, FlaskConical, Rocket } from 'lucide-react';
 import { hasBlocking } from '../../core/diff.ts';
 import { normalizeProjectUrl } from '../../core/project.ts';

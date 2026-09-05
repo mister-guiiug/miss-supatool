@@ -1,5 +1,5 @@
 import { registerSW } from 'virtual:pwa-register';
-import { UpdatePromptBanner } from '@mister-guiiug/dev-wpa-config/react/update-prompt-banner';
+import { UpdatePromptBanner } from '@mister-guiiug/dev-pwa-config/react/update-prompt-banner';
 
 /**
  * Bandeau de mise à jour du socle, remonté au-dessus de la barre de navigation

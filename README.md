@@ -207,7 +207,7 @@ reprises, l'arrêt et l'invariant de lecture seule sans réseau ni serveur
 factice.
 
 Configuration partagée de la famille :
-[`@mister-guiiug/dev-wpa-config`](https://github.com/mister-guiiug/dev-wpa-config).
+[`@mister-guiiug/dev-pwa-config`](https://github.com/mister-guiiug/dev-pwa-config).
 
 ## Licence
 

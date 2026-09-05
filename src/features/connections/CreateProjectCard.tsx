@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Card, CardHeader } from '@mister-guiiug/dev-wpa-config/react/card';
-import { Button } from '@mister-guiiug/dev-wpa-config/react/button';
-import { Badge } from '@mister-guiiug/dev-wpa-config/react/badge';
+import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
+import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
+import { Badge } from '@mister-guiiug/dev-pwa-config/react/badge';
 import {
   SelectField,
   TextField,
-} from '@mister-guiiug/dev-wpa-config/react/field';
-import { ConfirmDialog } from '@mister-guiiug/dev-wpa-config/react/confirm-dialog';
+} from '@mister-guiiug/dev-pwa-config/react/field';
+import { ConfirmDialog } from '@mister-guiiug/dev-pwa-config/react/confirm-dialog';
 import { Dices, PlusCircle, RefreshCw } from 'lucide-react';
 import { REGIONS } from '../../api/management.ts';
 import { useManagementStore } from '../../store/useManagementStore.ts';

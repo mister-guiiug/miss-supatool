@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Card, CardHeader } from '@mister-guiiug/dev-wpa-config/react/card';
-import { Button } from '@mister-guiiug/dev-wpa-config/react/button';
-import { Badge } from '@mister-guiiug/dev-wpa-config/react/badge';
-import { EmptyState } from '@mister-guiiug/dev-wpa-config/react/empty-state';
-import { formatNumber } from '@mister-guiiug/dev-wpa-config/format';
+import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
+import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
+import { Badge } from '@mister-guiiug/dev-pwa-config/react/badge';
+import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
+import { formatNumber } from '@mister-guiiug/dev-pwa-config/format';
 import {
   AlertTriangle,
   ArrowRight,

@@ -1,8 +1,8 @@
 import { HashRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
-import { BottomNav } from '@mister-guiiug/dev-wpa-config/react/bottom-nav';
-import { AppHeader } from '@mister-guiiug/dev-wpa-config/react/app-header';
-import { PageContainer } from '@mister-guiiug/dev-wpa-config/react/page-container';
-import { ThemeToggle } from '@mister-guiiug/dev-wpa-config/react/theme-toggle';
+import { BottomNav } from '@mister-guiiug/dev-pwa-config/react/bottom-nav';
+import { AppHeader } from '@mister-guiiug/dev-pwa-config/react/app-header';
+import { PageContainer } from '@mister-guiiug/dev-pwa-config/react/page-container';
+import { ThemeToggle } from '@mister-guiiug/dev-pwa-config/react/theme-toggle';
 import {
   Boxes,
   DatabaseZap,

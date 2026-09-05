@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Card, CardHeader } from '@mister-guiiug/dev-wpa-config/react/card';
-import { Button } from '@mister-guiiug/dev-wpa-config/react/button';
-import { TextField } from '@mister-guiiug/dev-wpa-config/react/field';
-import { ConfirmDialog } from '@mister-guiiug/dev-wpa-config/react/confirm-dialog';
-import { FamilyApps } from '@mister-guiiug/dev-wpa-config/react/family-apps';
+import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
+import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
+import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
+import { ConfirmDialog } from '@mister-guiiug/dev-pwa-config/react/confirm-dialog';
+import { FamilyApps } from '@mister-guiiug/dev-pwa-config/react/family-apps';
 import { KeyRound, RotateCcw } from 'lucide-react';
 import { APP_ID, REPO_URL, SPONSOR_URL } from '../../links.ts';
 import { useStore } from '../../store/useStore.ts';

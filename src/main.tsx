@@ -3,9 +3,9 @@ import { createRoot } from 'react-dom/client';
 import {
   installErrorReporter,
   initSentry,
-} from '@mister-guiiug/dev-wpa-config/react/observability';
-import { ThemeProvider } from '@mister-guiiug/dev-wpa-config/react/theme-provider';
-import { ToastProvider } from '@mister-guiiug/dev-wpa-config/react/toast';
+} from '@mister-guiiug/dev-pwa-config/react/observability';
+import { ThemeProvider } from '@mister-guiiug/dev-pwa-config/react/theme-provider';
+import { ToastProvider } from '@mister-guiiug/dev-pwa-config/react/toast';
 import { App } from './App.tsx';
 import './index.css';
 

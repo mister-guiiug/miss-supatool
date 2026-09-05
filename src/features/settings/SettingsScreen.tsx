@@ -5,7 +5,7 @@ import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { ConfirmDialog } from '@mister-guiiug/dev-pwa-config/react/confirm-dialog';
 import { FamilyApps } from '@mister-guiiug/dev-pwa-config/react/family-apps';
 import { KeyRound, RotateCcw } from 'lucide-react';
-import { APP_ID, REPO_URL, SPONSOR_URL } from '../../links.ts';
+import { APP_ID, REPO_URL } from '../../links.ts';
 import { useStore } from '../../store/useStore.ts';
 
 export function SettingsScreen() {
@@ -64,15 +64,8 @@ export function SettingsScreen() {
           Version <span className="mono">{__APP_VERSION__}</span> · build{' '}
           <span className="mono">{__APP_BUILD_ID__}</span>
         </p>
-        <p className="mt-2 text-sm">
-          <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
-            Code source
-          </a>
-          {' · '}
-          <a href={SPONSOR_URL} target="_blank" rel="noopener noreferrer">
-            Soutenir le projet
-          </a>
-        </p>
+        {/* Les deux liens ne sont plus recopiés ici : le pied de page de la
+            coquille les porte sur TOUS les écrans, celui-ci compris. */}
       </Card>
 
       <Card as="section">

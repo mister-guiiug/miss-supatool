@@ -71,7 +71,7 @@ function Shell() {
         Aller au contenu
       </a>
       <AppHeader title={title} actions={<ThemeToggle />} />
-      <PageContainer as="main" id="contenu" width="lg" className="app-main">
+      <PageContainer as="main" id="contenu" width="lg" reserve="bottom-nav">
         <Routes>
           <Route path="/" element={<ConnectionsScreen />} />
           <Route path="/analyse" element={<AnalyzeScreen />} />
@@ -90,6 +90,7 @@ function Shell() {
       </PageContainer>
       <UpdatePrompt />
       <BottomNav
+        placement="fixed"
         items={NAV}
         currentPath={location.pathname}
         linkComponent={Link}

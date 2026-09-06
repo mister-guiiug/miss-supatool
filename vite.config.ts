@@ -130,6 +130,25 @@ export default defineConfig(({ command }) => {
           lang: 'fr',
           dir: 'ltr',
           categories: ['productivity', 'utilities', 'developer'],
+          // Les deux captures de la fiche d'installation, prises par
+          // `pwa-screenshots` du socle sur un build (06/09/2026) : sans elles,
+          // Chrome propose une ligne et un bouton au lieu d'une fiche.
+          screenshots: [
+            {
+              src: 'screenshots/narrow.png',
+              sizes: '540x1170',
+              type: 'image/png',
+              form_factor: 'narrow',
+              label: 'L’application, sur téléphone',
+            },
+            {
+              src: 'screenshots/wide.png',
+              sizes: '1280x720',
+              type: 'image/png',
+              form_factor: 'wide',
+              label: 'L’application, sur ordinateur',
+            },
+          ],
           icons: [
             {
               src: 'icon-192.png',

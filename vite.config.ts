@@ -6,6 +6,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { readFileSync } from 'node:fs';
 import { pwaSeoPlugin } from '@mister-guiiug/dev-pwa-config/vite-pwa-base';
 import { cspPlugin } from '@mister-guiiug/dev-pwa-config/vite-csp';
+import { versionPlugin } from '@mister-guiiug/dev-pwa-config/vite-version';
 
 const analyze = process.env.ANALYZE === '1';
 const { version } = JSON.parse(readFileSync('./package.json', 'utf-8')) as {
@@ -86,6 +87,9 @@ export default defineConfig(({ command }) => {
       },
     },
     plugins: [
+      // AVANT cspPlugin : il pose un script inline dans le <head>, que la
+      // CSP doit hacher après coup ; et il écrit version.json au build.
+      versionPlugin({ manifest: true, define: false }),
       react(),
       tailwindcss(),
       pwaSeoPlugin({

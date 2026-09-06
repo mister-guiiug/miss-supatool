@@ -84,20 +84,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Le contenu ne doit jamais passer sous la barre de navigation basse. */
-.app-main {
-  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
-}
-
-/* `components.css` laisse volontairement la barre en `position: relative` :
-   c'est à l'app de décider où elle vit. Ici elle est collée au bas de la
-   fenêtre. Cette règle n'est pas layered, elle l'emporte donc sur le socle. */
-[data-dwc='bottom-nav'] {
-  position: fixed;
-  inset-inline: 0;
-  bottom: 0;
-  z-index: 30;
-}
+/* La barre basse est collée au bas de la fenêtre par `placement="fixed"` et
+   le contenu réservé par `reserve="bottom-nav"` (socle 4.3, dans App.tsx) :
+   la règle et le padding que ce fichier portait pour ça n'ont plus lieu. */
 
 /* Une monospace pour tout ce qui est identifiant technique : nom de table,
    chemin de fichier, extrait de clé. */

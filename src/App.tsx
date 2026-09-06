@@ -86,7 +86,7 @@ function Shell() {
             premier écran comme sur les Réglages — la règle famille. Écrit dans
             un `element={…}`, ce pied de page ne vaudrait que pour une route.
             Le lien de soutien n'est pas passé : il vient du catalogue. */}
-        <AppFooter repoUrl={REPO_URL} />
+        <AppFooter version issues repoUrl={REPO_URL} />
       </PageContainer>
       <UpdatePrompt />
       <BottomNav

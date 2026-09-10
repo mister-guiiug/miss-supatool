@@ -37,7 +37,13 @@
       content="black-translucent"
     />
     <meta name="apple-mobile-web-app-title" content="Miss Supatool" />
-    <link rel="apple-touch-icon" href="favicon.svg" />
+    <!--
+      UN PNG, PAS LE SVG. iOS ne sait pas lire un SVG pour `apple-touch-icon` :
+      il ignorait la balise et posait une CAPTURE DE LA PAGE sur l'écran
+      d'accueil. Le 180 est la taille que réclament les iPhone récents, et il
+      sort du même `npm run icons` que les autres.
+    -->
+    <link rel="apple-touch-icon" href="icon-180.png" />
     <meta
       name="description"
       content="Copiez les données d'un projet Supabase vers un autre : tables via PostgREST, fichiers via l'API Storage. Tout se passe dans votre navigateur."

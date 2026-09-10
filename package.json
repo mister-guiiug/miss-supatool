@@ -17,7 +17,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc -b",
-    "icons": "pwa-icons --source public/favicon.svg --out public --maskable",
+    "icons": "pwa-icons --source public/favicon.svg --out public --maskable --sizes 180,192,512",
     "prepare": "husky || true"
   },
   "bundleBudget": {

@@ -1,0 +1,51 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  role="img"
+  aria-label="Miss Supatool"
+>
+  <!--
+    LE MASKABLE, ET POURQUOI CE N'EST PAS `favicon.svg` EN PLUS PETIT.
+
+    Le PNG livré jusqu'ici sortait du générateur du socle en mode maskable, sans
+    qu'on lui donne de couleur de fond : la tuile arrondie était donc réduite sur
+    le fond PAR DÉFAUT, rgb(12,18,34). Ce bleu n'est pas le vert sombre de la
+    tuile, et le raccord se voyait — mesuré, le coin rendait rgb(12,18,34) quand
+    l'intérieur rendait rgb(49,163,112). Android en faisait un liseré tout autour.
+
+    DEUX DIFFÉRENCES AVEC LA SOURCE, ET DEUX SEULEMENT :
+
+      1. LE FOND N'A PLUS DE COINS. `rx="14"` disparaît : l'aplat occupe la toile
+         entière, donc il n'y a plus de bord à raccorder. C'est la MÊME couleur.
+
+      2. LE DESSIN RENTRE DANS LA ZONE DE SÉCURITÉ, le disque de 80 % de la
+         toile. Mesuré sur le rendu : recentré, il atteignait 222,3 px pour une
+         limite à 204,8 — les deux cylindres débordaient. À 86 % il tombe sous
+         les 192 px, treize pixels sous la limite.
+  -->
+  <rect width="64" height="64" fill="#0b1a14" />
+  <g transform="translate(32 32) scale(0.86) translate(-32 -32)">
+    <!-- Deux « bases » (cylindres) reliées par une flèche : source → cible. -->
+    <g fill="none" stroke="#3ecf8e" stroke-width="3" stroke-linecap="round">
+      <ellipse cx="18" cy="20" rx="9" ry="4" />
+      <path d="M9 20v14c0 2.2 4 4 9 4s9-1.8 9-4V20" />
+      <ellipse cx="46" cy="30" rx="9" ry="4" />
+      <path d="M37 30v14c0 2.2 4 4 9 4s9-1.8 9-4V30" />
+    </g>
+    <path
+      d="M27 26h8"
+      fill="none"
+      stroke="#f6faf8"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+    <path
+      d="M31 22l4 4-4 4"
+      fill="none"
+      stroke="#f6faf8"
+      stroke-width="3"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+</svg>

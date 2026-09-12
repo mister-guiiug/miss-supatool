@@ -4,6 +4,7 @@ import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { Badge } from '@mister-guiiug/dev-pwa-config/react/badge';
+import { PwaInstallPrompt } from '@mister-guiiug/dev-pwa-config/react/pwa-install-prompt';
 import {
   ArrowRight,
   Database,
@@ -218,6 +219,13 @@ export function ConnectionsScreen() {
         temps de l'onglet. Seules les URL, la sélection et les réglages sont
         conservés sur cet appareil.
       </p>
+
+      {/* ICI, ET PAS DANS LA COQUILLE. Un bandeau global paraîtrait par-dessus
+          une migration en cours ; sur cet écran, l'utilisateur est au repos.
+          Il ne rend rien tant qu'une installation n'est pas possible, ni une
+          fois l'application installée, et se propose au premier lancement puis
+          une fois par mois, trois fois — la cadence est dans le socle. */}
+      <PwaInstallPrompt />
     </div>
   );
 }

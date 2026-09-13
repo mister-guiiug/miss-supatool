@@ -11,6 +11,7 @@ import { UpdatePromptBanner } from '@mister-guiiug/dev-pwa-config/react/update-p
 export function UpdatePrompt() {
   return (
     <UpdatePromptBanner
+      checkEvery="1h"
       registerSW={registerSW}
       snoozeHours={4}
       className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] z-40"

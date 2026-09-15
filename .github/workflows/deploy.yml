@@ -24,4 +24,6 @@ jobs:
       # variable de dépôt `SUPABASE_PROXY_URL`. Vide = création de projet et
       # copie de structure indisponibles sur le site publié ; la copie des
       # données, elle, n'en dépend pas.
-      build-env: VITE_SUPABASE_PROXY=${{ vars.SUPABASE_PROXY_URL }}
+      build-env: |
+        VITE_SUPABASE_PROXY=${{ vars.SUPABASE_PROXY_URL }}
+        VITE_GA_MEASUREMENT_ID=${{ vars.VITE_GA_MEASUREMENT_ID }}

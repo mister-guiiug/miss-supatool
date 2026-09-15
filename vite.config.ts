@@ -99,6 +99,11 @@ export default defineConfig(({ command }) => {
       }),
       cspPlugin({
         dev: command === 'serve',
+        // Ouvre les hôtes de Google Tag Manager et de GA4. Sans cette
+        // option, le script que `ConsentBanner` injecte APRÈS l'accord serait
+        // refusé par la politique — et l'échec ne se verrait qu'en console,
+        // sur le site déployé, une fois le consentement donné.
+        analytics: true,
         // `https:` et non `https://*.supabase.co` : les deux projets que
         // l'utilisateur relie sont saisis À L'EXÉCUTION. Un projet Supabase
         // peut vivre sur un domaine personnalisé ou sur une instance

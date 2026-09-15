@@ -3,6 +3,8 @@ import { BottomNav } from '@mister-guiiug/dev-pwa-config/react/bottom-nav';
 import { AppHeader } from '@mister-guiiug/dev-pwa-config/react/app-header';
 import { PageContainer } from '@mister-guiiug/dev-pwa-config/react/page-container';
 import { AppFooter } from '@mister-guiiug/dev-pwa-config/react/app-footer';
+import { ConsentBanner } from '@mister-guiiug/dev-pwa-config/react/consent-banner';
+import { usePageViews } from '@mister-guiiug/dev-pwa-config/react/use-page-views';
 import { ThemeToggle } from '@mister-guiiug/dev-pwa-config/react/theme-toggle';
 import {
   Boxes,
@@ -65,6 +67,11 @@ function Shell() {
   const location = useLocation();
   const title = TITLES[location.pathname] ?? 'Miss Supatool';
 
+  // Une vue de page par navigation : GA4 n'en envoie qu'une par chargement
+  // de document, et `initAnalytics` pose `send_page_view: false` pour que la
+  // première passe par ici comme les autres. Ne fait rien sans consentement.
+  usePageViews(location.pathname);
+
   return (
     <>
       <a href="#contenu" className="sr-only focus:not-sr-only">
@@ -86,6 +93,11 @@ function Shell() {
             premier écran comme sur les Réglages — la règle famille. Écrit dans
             un `element={…}`, ce pied de page ne vaudrait que pour une route.
             Le lien de soutien n'est pas passé : il vient du catalogue. */}
+        {/* Une `region`, pas une boîte modale : elle ne recouvre rien et ne
+            piège pas le focus. Ne rend RIEN sans `VITE_GA_MEASUREMENT_ID`. */}
+        <ConsentBanner
+          gaMeasurementId={import.meta.env.VITE_GA_MEASUREMENT_ID}
+        />
         <AppFooter version issues repoUrl={REPO_URL} />
       </PageContainer>
       <UpdatePrompt />

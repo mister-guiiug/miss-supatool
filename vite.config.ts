@@ -66,6 +66,13 @@ export default defineConfig(({ command }) => {
           manualChunks(id) {
             if (!id.includes('node_modules')) return;
             const norm = id.replace(/\\/g, '/');
+            // Sentry est chargé par un `import()` que `loader` rend
+            // analysable. Sans cette ligne il tomberait dans `vendor`,
+            // qui est PRÉCHARGÉ : mesuré sur miss-uwh, 381,9 kB
+            // préchargés au lieu de 227,2 — pour un total gzip identique
+            // à 0,1 kB près. Le total ne voit pas la différence,
+            // `bundleBudget.preloadGzipKb` si.
+            if (norm.includes('/@sentry/')) return 'sentry';
             if (
               norm.includes('/vite-plugin-pwa/') ||
               norm.includes('/workbox-')
@@ -120,6 +127,19 @@ export default defineConfig(({ command }) => {
         includeAssets: ['favicon.svg', 'robots.txt'],
         workbox: {
           globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,webmanifest}'],
+          /*
+           * LE MORCEAU SENTRY HORS DU PRÉCACHE, sans quoi le découpage
+           * ci-dessus ne servirait à rien : `globPatterns` ramasse TOUT le
+           * JS émis, `import()` ou pas. Mesuré le 16/09/2026 sur la
+           * production de deux apps du parc, 345 et 463 KiB bruts de SDK
+           * téléchargés par chaque visiteur — sans qu’aucun DSN soit posé.
+           *
+           * Hors précache, il est cherché sur le réseau à la première
+           * erreur, et jamais si l’observabilité reste éteinte. Ne pas
+           * l’avoir hors ligne est sans conséquence : rapporter une erreur
+           * demande le réseau.
+           */
+          globIgnores: ['**/sentry-*.js'],
           // Le shell est mis en cache ; les appels aux projets Supabase
           // (REST + Storage) restent réseau.
           navigateFallbackDenylist: [/supabase\.(co|in)/],

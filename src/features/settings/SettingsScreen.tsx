@@ -58,15 +58,10 @@ export function SettingsScreen() {
         </div>
       </Card>
 
-      <Card as="section">
-        <CardHeader as="h2" title="À propos" />
-        <p className="text-sm text-[var(--st-text-soft)]">
-          Version <span className="mono">{__APP_VERSION__}</span> · build{' '}
-          <span className="mono">{__APP_BUILD_ID__}</span>
-        </p>
-        {/* Les deux liens ne sont plus recopiés ici : le pied de page de la
-            coquille les porte sur TOUS les écrans, celui-ci compris. */}
-      </Card>
+      {/* Plus de carte « À propos » : elle ne portait que le numéro de version
+          et l'identifiant de build. Les deux liens ne sont plus recopiés ici
+          non plus — le pied de page de la coquille les porte sur TOUS les
+          écrans, celui-ci compris. */}
 
       <Card as="section">
         <FamilyApps currentAppId={APP_ID} repoUrl={REPO_URL} />

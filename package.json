@@ -22,16 +22,17 @@
     "prepare": "husky || true"
   },
   "bundleBudget": {
-    "totalGzipKb": 321,
+    "totalGzipKb": 377,
     "preloadGzipKb": 162,
-    "_pourquoiPreload": "Posé le 16/09/2026 avec Sentry, socle 4.18.0. Le total compte les morceaux ASYNCHRONES : il monte de 200 à 321 kB par la seule installation du SDK, alors que le chemin critique ne bouge pas. Sans cette seconde borne, ~151 kB de mou couvriraient toute régression. Mesuré 146.7 kB, budget à +10 %."
+    "_pourquoiPreload": "Posé le 16/09/2026 avec Sentry, socle 4.18.0. Le total compte les morceaux ASYNCHRONES : il monte de 200 à 321 kB par la seule installation du SDK, alors que le chemin critique ne bouge pas. Sans cette seconde borne, ~151 kB de mou couvriraient toute régression. Mesuré 146.7 kB, budget à +10 %.",
+    "_pourquoi": "RELEVÉ DE 321 À 377 LE 19/09/2026 : `posthog-js` entre avec l'ADR 0012, le parc quittant GA4 pour PostHog en Europe. 341,9 kB mesurés, 377 = mesure + 10 % (la formule du cliquet du socle). LE MORCEAU EST DIFFÉRÉ ET LE RESTE : il n'est chargé qu'APRÈS l'accord, et un visiteur qui refuse ne le télécharge jamais — c'est `preloadGzipKb`, inchangé par ce commit, qui garde le chemin critique. Le `loader` vise `posthog-js/dist/module.slim.js` : 48,9 kB gzip au lieu de 97,6 pour l'entrée par défaut, en laissant dehors l'enregistrement de session, l'autocapture, les sondages et la barre d'outils — que l'ADR 0012 coupe de toute façon. MESURER EN CI, PAS EN LOCAL."
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs,json,css,md,yml,yaml}": "prettier --write"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@mister-guiiug/dev-pwa-config": "^4.21.3",
+    "@mister-guiiug/dev-pwa-config": "^6.0.1",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -57,6 +58,7 @@
   "dependencies": {
     "@sentry/react": "^10.75.0",
     "lucide-react": "^1.47.0",
+    "posthog-js": "^1.434.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.4",

@@ -67,9 +67,10 @@ function Shell() {
   const location = useLocation();
   const title = TITLES[location.pathname] ?? 'Miss Supatool';
 
-  // Une vue de page par navigation : GA4 n'en envoie qu'une par chargement
-  // de document, et `initAnalytics` pose `send_page_view: false` pour que la
-  // première passe par ici comme les autres. Ne fait rien sans consentement.
+  // Une vue de page par navigation — ni zéro, ni deux. `initAnalytics` pose
+  // `capture_pageview: false` pour que toutes passent par ici, la première
+  // comprise : laissé à lui-même, PostHog compterait chaque navigation deux
+  // fois. Ne fait rien sans consentement.
   usePageViews(location.pathname);
 
   return (
@@ -94,9 +95,10 @@ function Shell() {
             un `element={…}`, ce pied de page ne vaudrait que pour une route.
             Le lien de soutien n'est pas passé : il vient du catalogue. */}
         {/* Une `region`, pas une boîte modale : elle ne recouvre rien et ne
-            piège pas le focus. Ne rend RIEN sans `VITE_GA_MEASUREMENT_ID`. */}
+            piège pas le focus. Ne rend RIEN sans `VITE_POSTHOG_KEY`. */}
         <ConsentBanner
-          gaMeasurementId={import.meta.env.VITE_GA_MEASUREMENT_ID}
+          posthogKey={import.meta.env.VITE_POSTHOG_KEY}
+          loader={() => import('posthog-js/dist/module.slim.js')}
         />
         <AppFooter version issues repoUrl={REPO_URL} />
       </PageContainer>

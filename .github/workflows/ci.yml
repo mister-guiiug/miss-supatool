@@ -19,4 +19,17 @@ jobs:
     # secrets du dépôt à un workflow qui n'en demande pas un seul.
     with:
       run-doctor: true # la checklist du parc, lue sur le dépôt et sur dist/ (AMELIORATIONS.md, T2)
+      # `doctor-strict` reste à `false`, et voici pourquoi. Mesuré le 19/09/2026
+      # en jouant `--strict` pour de vrai sur ce dépôt : le docteur rend
+      # « 0 défaut(s), 2 dette(s) », et `--strict` échoue sur une dette
+      # (pwa-doctor.mjs:1631). Ce qui bloque aujourd'hui :
+      #   · pas de nettoyage des runs
+      #   · code source + soutien sur tous les écrans, rendus par la coquille
+      # Le mode strict s'active quand cette liste est vide. Pas avant : une CI
+      # rouge sur une dette connue et non traitée n'apprend rien à personne.
+      # Aucune suite Playwright ici : `@playwright/test` n'est pas installé et
+      # le dépôt ne contient pas une seule spec (relevé du 19/09/2026). Il n'y
+      # a donc rien à jouer — et le réutilisable ferait échouer le job plutôt
+      # que de sortir vert sur zéro test. À repasser à `true` le jour où une
+      # suite `e2e/` existe.
       run-e2e: false

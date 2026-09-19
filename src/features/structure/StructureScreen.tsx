@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { Badge } from '@mister-guiiug/dev-pwa-config/react/badge';
+import { GESTES, trackEvent } from '@mister-guiiug/dev-pwa-config/analytics';
 import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
 import { SegmentedControl } from '@mister-guiiug/dev-pwa-config/react/segmented-control';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
@@ -57,6 +58,29 @@ export function StructureScreen() {
 
   const sourceRef = refOf(source.url);
   const targetRef = refOf(target.url);
+
+  /*
+   * RECOPIER LA STRUCTURE — la deuxième des trois étapes annoncées par
+   * l'application (créer le projet, poser la structure, verser les données).
+   * Les deux boutons qui la déclenchent (simuler, ou créer pour de vrai)
+   * passent par ici : dupliquer la mesure les ferait diverger un jour.
+   *
+   * L'ISSUE, PAS LE CLIC. `applyStructure` range son erreur dans
+   * `structureError` au lieu de lever : c'est donc lui qu'on relit, une fois
+   * la promesse retombée. Ni la référence du projet, ni le SQL exécuté, ni le
+   * nom d'un seul objet — `simulation` dit tout ce qu'on a besoin de savoir.
+   */
+  const lancerStructure = (): void => {
+    void applyStructure().then(() => {
+      trackEvent(GESTES.OPERATION, {
+        nom: 'structure',
+        etape: useManagementStore.getState().structureError
+          ? 'echouee'
+          : 'reussie',
+        simulation: dryRun,
+      });
+    });
+  };
 
   if (!available) {
     return (
@@ -198,13 +222,17 @@ export function StructureScreen() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() =>
+                  onClick={() => {
                     downloadText(
                       statements.map(s => s.sql).join('\n\n'),
                       `structure-${dateSlug()}.sql`,
                       'application/sql'
-                    )
-                  }
+                    );
+                    // Emporter le SQL au lieu de le faire exécuter : l'autre
+                    // façon de se servir de cet écran, et on ne sait pas
+                    // laquelle des deux l'emporte.
+                    trackEvent(GESTES.EXPORT, { format: 'sql' });
+                  }}
                 >
                   <Download aria-hidden="true" size={16} />
                   SQL
@@ -278,7 +306,7 @@ export function StructureScreen() {
                 aria-disabled={!targetRef || statements.length === 0}
                 onClick={() => {
                   if (!targetRef || statements.length === 0) return;
-                  if (dryRun) void applyStructure();
+                  if (dryRun) lancerStructure();
                   else setConfirming(true);
                 }}
               >
@@ -353,7 +381,7 @@ export function StructureScreen() {
         confirmLabel="Créer la structure"
         onConfirm={() => {
           setConfirming(false);
-          void applyStructure();
+          lancerStructure();
         }}
         onCancel={() => setConfirming(false)}
       />

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { Badge } from '@mister-guiiug/dev-pwa-config/react/badge';
+import { GESTES, trackEvent } from '@mister-guiiug/dev-pwa-config/analytics';
 import {
   SelectField,
   TextField,
@@ -219,7 +220,28 @@ export function CreateProjectCard() {
         confirmLabel="Créer le projet"
         onConfirm={() => {
           setConfirming(false);
-          void createProject({ name, organizationSlug, region, dbPass });
+          /*
+           * CRÉER LE PROJET CIBLE — la première des trois étapes, et la seule
+           * qui engage la facture de quelqu'un. Savoir combien aboutissent, et
+           * combien butent sur le relais ou les droits du jeton, est la mesure
+           * qui dit si cette carte tient sa promesse.
+           *
+           * `createProject` range son erreur dans `creationError` au lieu de
+           * lever : on relit l'état une fois la promesse retombée.
+           *
+           * NI LE NOM DU PROJET, NI L'ORGANISATION, NI LA RÉGION, NI RIEN QUI
+           * APPROCHE LE MOT DE PASSE DE LA BASE.
+           */
+          void createProject({ name, organizationSlug, region, dbPass }).then(
+            () => {
+              trackEvent(GESTES.OPERATION, {
+                nom: 'creation_projet',
+                etape: useManagementStore.getState().creationError
+                  ? 'echouee'
+                  : 'reussie',
+              });
+            }
+          );
         }}
         onCancel={() => setConfirming(false)}
       />

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { Badge } from '@mister-guiiug/dev-pwa-config/react/badge';
+import { GESTES, trackEvent } from '@mister-guiiug/dev-pwa-config/analytics';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
 import { SegmentedControl } from '@mister-guiiug/dev-pwa-config/react/segmented-control';
@@ -63,8 +64,37 @@ export function RunScreen() {
   const canStart = !running && !blocked && armed && plan.tables.length > 0;
 
   const onStart = async (): Promise<void> => {
+    /*
+     * LA COPIE EST LA RAISON D'ÊTRE DE L'APP, et c'est aussi la seule chose
+     * ici qui dure des minutes. D'où DEUX événements : un départ, une issue.
+     * L'écart entre les deux dit ce qu'aucun autre chiffre ne dira — les
+     * copies dont on n'a jamais vu la fin, onglet fermé ou machine endormie.
+     *
+     * `simulation` EST LA MESURE QUI COMPTE. Le mode par défaut ne touche à
+     * rien ; savoir combien d'utilisateurs franchissent le pas de la copie
+     * réelle dit si l'outil sert vraiment, ou s'il rassure seulement.
+     *
+     * NI LES URL DES PROJETS, NI LEUR RÉFÉRENCE, NI LES NOMS DE TABLES, NI LE
+     * NOMBRE DE LIGNES : ce sont les identifiants et le volume d'une
+     * infrastructure qui appartient à quelqu'un d'autre. Le rapport, lui,
+     * reste sur l'appareil.
+     */
+    trackEvent(GESTES.OPERATION, {
+      nom: 'migration',
+      etape: 'lancee',
+      simulation: options.dryRun,
+    });
     await start();
-    if (useStore.getState().summary) navigate('/rapport');
+    const summary = useStore.getState().summary;
+    trackEvent(GESTES.OPERATION, {
+      nom: 'migration',
+      etape: summary ? 'reussie' : 'echouee',
+      simulation: options.dryRun,
+      // `start` avale son erreur dans le journal : l'absence de résumé EST
+      // l'échec. Un arrêt demandé, lui, produit bien un résumé.
+      interrompue: summary?.aborted === true,
+    });
+    if (summary) navigate('/rapport');
   };
 
   return (

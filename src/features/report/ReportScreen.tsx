@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { Badge } from '@mister-guiiug/dev-pwa-config/react/badge';
+import { GESTES, trackEvent } from '@mister-guiiug/dev-pwa-config/analytics';
 import { Stat } from '@mister-guiiug/dev-pwa-config/react/stat';
 import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
 import { dateSlug, downloadJson } from '@mister-guiiug/dev-pwa-config/download';
@@ -114,6 +115,9 @@ export function ReportScreen() {
       }),
       `miss-supatool-${dateSlug()}.json`
     );
+    // Le rapport emporté : la fin du parcours, et le geste qui dit que la
+    // copie a servi à quelque chose. Seul le format part.
+    trackEvent(GESTES.EXPORT, { format: 'json' });
   };
 
   return (

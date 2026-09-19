@@ -19,4 +19,15 @@ jobs:
     # secrets du dépôt à un workflow qui n'en demande pas un seul.
     with:
       run-doctor: true # la checklist du parc, lue sur le dépôt et sur dist/ (AMELIORATIONS.md, T2)
+      # `--strict` : une dette suffit désormais à faire échouer le job. Relevé
+      # du 19/09/2026 : les dix-huit dépôts qui lancent le docteur étaient tous
+      # à zéro défaut ET zéro dette, et AUCUN en mode strict — le docteur
+      # parlait, rien ne l'écoutait. Gratuit aujourd'hui, il interdit la
+      # prochaine régression.
+      doctor-strict: true
+      # Aucune suite Playwright ici : `@playwright/test` n'est pas installé et
+      # le dépôt ne contient pas une seule spec (relevé du 19/09/2026). Il n'y
+      # a donc rien à jouer — et le réutilisable ferait échouer le job plutôt
+      # que de sortir vert sur zéro test. À repasser à `true` le jour où une
+      # suite `e2e/` existe.
       run-e2e: false

@@ -64,7 +64,15 @@ export function SettingsScreen() {
           écrans, celui-ci compris. */}
 
       <Card as="section">
-        <FamilyApps currentAppId={APP_ID} repoUrl={REPO_URL} />
+        {/* Cette app n'a jamais réécrit l'habillage de la grille : elle prend
+            la base du paquet telle quelle, et n'a donc pas besoin de
+            `layout`. Ne manquait que le repli — dix-neuf cartes d'affilée
+            font un mur, sept lignes non. */}
+        <FamilyApps
+          currentAppId={APP_ID}
+          repoUrl={REPO_URL}
+          groupBy="category"
+        />
       </Card>
 
       <ConfirmDialog

@@ -33,3 +33,8 @@ jobs:
       # que de sortir vert sur zéro test. À repasser à `true` le jour où une
       # suite `e2e/` existe.
       run-e2e: false
+      # Second avis TypeScript 7, NON BLOQUANT. La 6 reste la référence : c'est
+      # elle que typescript-eslint résout, et il refuse la 7.0 par une assertion
+      # à l'import. Le jour où typescript-eslint#10940 se ferme, cette entrée
+      # et l'alias `typescript-7` disparaissent ensemble.
+      run-type-check-7: true

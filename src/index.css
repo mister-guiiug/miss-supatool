@@ -28,6 +28,15 @@
   --st-ok: #0f9d63;
   --st-warn: #b45309;
   --st-danger: #be123c;
+  /* La primaire des composants partagés : un vert À PART de `--st-ok`, parce
+     que le socle lui demande deux choses que `--st-ok` ne tient pas en clair.
+     Il la peint en APLAT sous une encre (bouton primaire, bouton de
+     confirmation) — `#052b1c` sur `#0f9d63` : 4,40:1 — et l'emploie en TEXTE
+     (liens, survols) — `#0f9d63` sur blanc : 3,49:1. Tous deux sous le 4,5 de
+     WCAG AA. Plus dense, sous du blanc : 5,82 en aplat, 5,82 en texte sur la
+     surface, 4,89 sur le fond teinté. `src/theme.test.ts` le mesure. */
+  --st-primary: #08744a;
+  --st-primary-ink: #ffffff;
   color-scheme: light;
 }
 
@@ -41,6 +50,10 @@
   --st-ok: #3ecf8e;
   --st-warn: #f59e0b;
   --st-danger: #fb7185;
+  /* En sombre, le vert vif tient les deux emplois : 7,69:1 sous l'encre
+     sombre, 8,12 en texte sur la surface. */
+  --st-primary: var(--st-ok);
+  --st-primary-ink: #052b1c;
   color-scheme: dark;
 }
 
@@ -56,8 +69,8 @@
   /* Contour d'un CONTRÔLE : WCAG 1.4.11 exige 3:1, que `--st-border` ne tient
      pas en thème clair. `--st-text-soft` le tient dans les deux thèmes. */
   --dwc-border-strong: var(--st-text-soft);
-  --dwc-primary: var(--st-ok);
-  --dwc-primary-contrast: #052b1c;
+  --dwc-primary: var(--st-primary);
+  --dwc-primary-contrast: var(--st-primary-ink);
   --dwc-primary-soft: color-mix(in srgb, var(--st-ok) 15%, var(--st-surface));
   --dwc-success: var(--st-ok);
   --dwc-warning: var(--st-warn);
@@ -67,7 +80,6 @@
 }
 
 [data-theme='dark'] {
-  --dwc-primary-contrast: #052b1c;
   --dwc-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
 }
 

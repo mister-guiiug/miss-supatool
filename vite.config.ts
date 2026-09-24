@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { pwaSeoPlugin } from '@mister-guiiug/dev-pwa-config/vite-pwa-base';
 import { cspPlugin } from '@mister-guiiug/dev-pwa-config/vite-csp';
 import { versionPlugin } from '@mister-guiiug/dev-pwa-config/vite-version';
+import { NAVIGATE_FALLBACK_DENY_FILES } from '@mister-guiiug/dev-pwa-config/vite-pwa';
 
 const analyze = process.env.ANALYZE === '1';
 const { version } = JSON.parse(readFileSync('./package.json', 'utf-8')) as {
@@ -173,7 +174,11 @@ export default defineConfig(({ command }) => {
           globIgnores: ['**/sentry.js', '**/sentry-*.js'],
           // Le shell est mis en cache ; les appels aux projets Supabase
           // (REST + Storage) restent réseau.
-          navigateFallbackDenylist: [/supabase\.(co|in)/],
+          // Un fichier (sitemap.xml, llms.txt…) va au réseau, pas à index.html.
+          navigateFallbackDenylist: [
+            NAVIGATE_FALLBACK_DENY_FILES,
+            /supabase\.(co|in)/,
+          ],
         },
         manifest: {
           id: basePath,

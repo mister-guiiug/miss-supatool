@@ -4,6 +4,7 @@ import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { ConfirmDialog } from '@mister-guiiug/dev-pwa-config/react/confirm-dialog';
 import { FamilyApps } from '@mister-guiiug/dev-pwa-config/react/family-apps';
+import { AppFooter } from '@mister-guiiug/dev-pwa-config/react/app-footer';
 import { KeyRound, RotateCcw } from 'lucide-react';
 import { APP_ID, REPO_URL } from '../../links.ts';
 import { useStore } from '../../store/useStore.ts';
@@ -70,10 +71,17 @@ export function SettingsScreen() {
             font un mur, sept lignes non. */}
         <FamilyApps
           currentAppId={APP_ID}
-          repoUrl={REPO_URL}
+          // Le code source et le soutien viennent du pied de page ci-dessous,
+          // avec la version et le signalement : pas deux fois les mêmes liens.
+          showSource={false}
+          showSponsor={false}
           groupBy="category"
         />
       </Card>
+
+      {/* Le code source, le soutien et le signalement : ici et sur l'accueil,
+          nulle part ailleurs (règle famille du 06/09/2026). */}
+      <AppFooter version issues repoUrl={REPO_URL} />
 
       <ConfirmDialog
         open={confirming}

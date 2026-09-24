@@ -2,7 +2,6 @@ import { HashRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
 import { BottomNav } from '@mister-guiiug/dev-pwa-config/react/bottom-nav';
 import { AppHeader } from '@mister-guiiug/dev-pwa-config/react/app-header';
 import { PageContainer } from '@mister-guiiug/dev-pwa-config/react/page-container';
-import { AppFooter } from '@mister-guiiug/dev-pwa-config/react/app-footer';
 import { ConsentBanner } from '@mister-guiiug/dev-pwa-config/react/consent-banner';
 import { usePageViews } from '@mister-guiiug/dev-pwa-config/react/use-page-views';
 import { ThemeToggle } from '@mister-guiiug/dev-pwa-config/react/theme-toggle';
@@ -21,7 +20,6 @@ import { RunScreen } from './features/run/RunScreen.tsx';
 import { ReportScreen } from './features/report/ReportScreen.tsx';
 import { SettingsScreen } from './features/settings/SettingsScreen.tsx';
 import { UpdatePrompt } from './pwa/UpdatePrompt.tsx';
-import { REPO_URL } from './links.ts';
 
 /**
  * L'ordre est celui d'une migration : brancher, regarder, bâtir, remplir,
@@ -100,7 +98,9 @@ function Shell() {
           posthogKey={import.meta.env.VITE_POSTHOG_KEY}
           loader={() => import('posthog-js/dist/module.slim.js')}
         />
-        <AppFooter version issues repoUrl={REPO_URL} />
+        {/* PAS DE PIED DE PAGE ICI : la règle famille (06/09/2026) le veut sur
+            l'accueil et les Réglages seulement — voir ConnectionsScreen et
+            SettingsScreen. */}
       </PageContainer>
       <UpdatePrompt />
       <BottomNav

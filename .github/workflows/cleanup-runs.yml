@@ -1,0 +1,19 @@
+# Élague l'historique Actions de ce dépôt. Appelable à la main.
+name: Cleanup runs
+
+on:
+  workflow_dispatch:
+    inputs:
+      keep:
+        description: 'Exécutions conservées par workflow'
+        type: string
+        default: '20'
+
+permissions:
+  actions: write
+
+jobs:
+  cleanup:
+    uses: mister-guiiug/dev-pwa-config/.github/workflows/cleanup-runs.yml@v6
+    with:
+      keep: ${{ inputs.keep }}

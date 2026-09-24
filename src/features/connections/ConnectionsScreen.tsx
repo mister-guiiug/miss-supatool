@@ -17,6 +17,8 @@ import {
 import { checkConnection, isSameProject } from '../../core/project.ts';
 import { useStore, type Connection } from '../../store/useStore.ts';
 import { CreateProjectCard } from './CreateProjectCard.tsx';
+import { AppFooter } from '@mister-guiiug/dev-pwa-config/react/app-footer';
+import { REPO_URL } from '../../links.ts';
 
 /**
  * La prop s'appelle `side` et non `role` : `role` sur un composant JSX est lu
@@ -226,6 +228,11 @@ export function ConnectionsScreen() {
           fois l'application installée, et se propose au premier lancement puis
           une fois par mois, trois fois — la cadence est dans le socle. */}
       <PwaInstallPrompt />
+
+      {/* Le code source, le soutien et le signalement : ici, sur l'accueil,
+          et dans les Réglages, nulle part ailleurs (règle famille du
+          06/09/2026). */}
+      <AppFooter version issues repoUrl={REPO_URL} />
     </div>
   );
 }

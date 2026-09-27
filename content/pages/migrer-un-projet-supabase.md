@@ -36,7 +36,7 @@ Deux pièges de plus pendant la copie : les déclencheurs de la cible s'exécute
 
 ## Comment Miss Supatool vous aide
 
-Miss Supatool est une application web qui mène cette migration en cinq étapes : Projets, Contenu, Structure, Copie, Rapport.
+[Miss Supatool](https://mister-guiiug.github.io/miss-supatool/) est une application web qui mène cette migration en cinq étapes : Projets, Contenu, Structure, Copie, Rapport.
 
 - **Brancher les deux projets**, avec l'URL et la clé `service_role` de chacun. L'outil repère une clé publique et vous prévient. Si la cible n'existe pas, il peut la créer, attendre son démarrage et récupérer sa clé. La création peut être facturée selon votre plan : elle est confirmée avant, et l'outil ne sait pas supprimer un projet.
 - **Comparer les deux schémas** et calculer l'ordre de copie à partir des clés étrangères.

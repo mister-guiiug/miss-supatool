@@ -40,9 +40,10 @@ management, donc par un relais : voir [Pourquoi un relais](#pourquoi-un-relais).
 Le relevé **demande à Postgres de se décrire lui-même** :
 `pg_get_constraintdef`, `pg_get_indexdef`, `pg_get_viewdef`,
 `pg_get_functiondef`, `pg_get_triggerdef` rendent les définitions exactes,
-telles que Postgres les réécrirait. Seule la liste des colonnes d'un
-`CREATE TABLE` est recomposée — identité, colonnes calculées et valeurs par
-défaut comprises.
+telles que Postgres les réécrirait. Le reste est recomposé à partir du
+catalogue : la liste des colonnes d'un `CREATE TABLE` (identité, colonnes
+calculées et valeurs par défaut comprises), les types énumérés, les séquences,
+les politiques et les droits.
 
 Trois propriétés en découlent :
 
@@ -87,7 +88,9 @@ structure s'annoncent indisponibles, et la copie de données continue seule.
 
 Le relais est sans état, cible verrouillée sur `api.supabase.com`, chemins et
 origines sur liste blanche en **refus par défaut**, et ne connaît **aucune
-méthode de suppression**. Le jeton ne fait que le traverser.
+méthode de suppression**. Le jeton, le mot de passe de base d'un projet créé
+ici, la clé de service qu'il renvoie, le SQL de structure et les lignes lues ne
+font que le traverser : il n'en garde rien.
 
 ## Sécurité
 
@@ -100,9 +103,15 @@ méthode de suppression**. Le jeton ne fait que le traverser.
   tests). La seule exception est le `POST` de listage du stockage, qui ne
   modifie rien.
 - **Copier un projet sur lui-même est refusé.**
-- **Une écriture réelle doit être armée** en recopiant la référence du projet
-  cible. Le mode par défaut est la **simulation** : tout est lu et compté, rien
-  n'est écrit.
+- **Une copie réelle des données doit être armée** en recopiant la référence
+  du projet cible ; l'application de la structure demande une confirmation, et
+  la remise à niveau des séquences part d'un clic, après une copie réelle. Le
+  mode par défaut est la **simulation** : tout est lu et compté, rien n'est
+  écrit.
+- **Services tiers du site publié** : Sentry (région européenne) démarre à
+  l'ouverture, sans demande de consentement (il signale la session et reçoit un
+  rapport à chaque erreur) ; PostHog (nuage européen) ne mesure l'audience
+  qu'après accord dans le bandeau.
 - Les clés éventuellement présentes dans les messages d'erreur sont **masquées**
   dans le journal comme dans le rapport exporté.
 - Une clé `service_role` contourne la RLS et ouvre toute la base. Utilisez-la
@@ -161,7 +170,7 @@ d'audit). Le champ « Colonnes à ne pas copier » sert exactement à ça — et
   concurrentes à la source, et non rejouable (une relance créerait des doublons).
 - Un **cycle** de clés étrangères, ou une table qui se référence elle-même, ne
   peut pas être ordonné : l'outil le signale et certaines lignes peuvent être
-  refusées. Une seconde passe les rattrape en général.
+  refusées. Relancer la copie, en mise à jour, les rattrape en général.
 - Les valeurs par défaut, contraintes CHECK et colonnes générées **ne sont pas
   visibles** dans la description OpenAPI : la vérification faite à l'écran
   **Contenu** porte sur les colonnes, leur type et leur caractère obligatoire,
@@ -184,7 +193,7 @@ npm run dev
 
 | Commande             | Effet                                    |
 | -------------------- | ---------------------------------------- |
-| `npm run dev`        | Serveur de développement (port 5234)     |
+| `npm run dev`        | Serveur de développement (port 5173)     |
 | `npm test`           | Tests unitaires (Vitest)                 |
 | `npm run type-check` | `tsc -b`                                 |
 | `npm run lint`       | ESLint                                   |

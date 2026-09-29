@@ -1,6 +1,9 @@
 ---
 title: Migrer un projet Supabase vers un autre : structure et données
 description: Copier un projet Supabase vers un autre : quoi déplacer, dans quel ordre, les pièges des séquences et de la RLS, et un outil qui le fait dans le navigateur.
+date: 2026-09-25
+updated: 2026-09-29
+answer: Pour migrer un projet Supabase, on recrée d'abord la structure dans la cible, puis on copie les tables dans l'ordre des clés étrangères et les fichiers seau par seau, avant de remettre les séquences à niveau. Les comptes utilisateurs, les fonctions Edge, les secrets et les réglages de connexion se reprennent à part.
 ---
 
 # Migrer un projet Supabase vers un autre
@@ -47,9 +50,11 @@ Deux pièges de plus pendant la copie : les déclencheurs de la cible s'exécute
 
 Les clés ne sont jamais enregistrées : elles restent en mémoire le temps de l'onglet. La création de projet, la copie de structure et les séquences passent par un relais, avec votre jeton d'accès personnel Supabase.
 
+Supabase déclare les clés `anon` et `service_role` obsolètes d'ici fin 2026, au profit des clés `sb_publishable_…` et `sb_secret_…`. Miss Supatool reconnaît une clé `sb_secret_…`, mais la signale : sur un projet neuf, elle n'a pas été acceptée partout où la `service_role` du même projet l'était. Si les appels échouent, reprenez la `service_role` tant qu'elle existe.
+
 ## Ce que l'outil ne copie pas
 
-- les comptes utilisateurs (`auth.users`) : passez par l'API d'administration de l'authentification ou l'outil de migration officiel ;
+- les comptes utilisateurs (`auth.users`) : passez par l'API d'administration de l'authentification ou, sur une offre payante, par la restauration d'une sauvegarde dans un nouveau projet, qui les reprend ;
 - ce qui vit hors du schéma choisi (`public` par défaut), dont les politiques du stockage ;
 - les tables partitionnées, les domaines et les collations ;
 - les secrets du coffre (Vault), les tâches cron et les rôles ;
@@ -71,8 +76,15 @@ Oui, avec la structure, pour le schéma choisi. Les politiques du stockage, qui 
 
 ### Pourquoi faut-il la clé service_role ?
 
-Elle contourne la RLS : c'est ce qui permet de lire toutes les lignes de la source et d'écrire dans la cible. Elle ouvre donc toute la base. Utilisez-la depuis un appareil de confiance et régénérez-la au moindre doute.
+Elle contourne la RLS : c'est ce qui permet de lire toutes les lignes de la source et d'écrire dans la cible. Elle ouvre donc toute la base. Utilisez-la depuis un appareil de confiance et régénérez-la au moindre doute. Supabase la déclare obsolète d'ici fin 2026, au profit des clés `sb_secret_…`.
 
 ### La migration peut-elle abîmer le projet source ?
 
 Miss Supatool ne l'écrit jamais : son client refuse toute requête d'écriture vers la source avant de l'envoyer. Et par défaut, chaque étape commence par une simulation qui lit tout et n'écrit rien.
+
+## Sources
+
+- [Sauvegarde et restauration avec la CLI](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore) : `supabase db dump` et `psql`.
+- [Clés d'API de Supabase](https://supabase.com/docs/guides/getting-started/api-keys) : la clé secrète contourne la RLS, anciennes clés obsolètes d'ici fin 2026.
+- [Restaurer dans un nouveau projet](https://supabase.com/docs/guides/platform/clone-project) : comptes repris, fichiers du stockage non copiés.
+- [Fonctions de séquence de PostgreSQL](https://www.postgresql.org/docs/current/functions-sequence.html) : `setval`.

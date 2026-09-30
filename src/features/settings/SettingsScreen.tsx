@@ -3,6 +3,7 @@ import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { ConfirmDialog } from '@mister-guiiug/dev-pwa-config/react/confirm-dialog';
+import { ConsentSection } from '@mister-guiiug/dev-pwa-config/react/consent-section';
 import { FamilyApps } from '@mister-guiiug/dev-pwa-config/react/family-apps';
 import { AppFooter } from '@mister-guiiug/dev-pwa-config/react/app-footer';
 import { KeyRound, RotateCcw } from 'lucide-react';
@@ -57,6 +58,18 @@ export function SettingsScreen() {
             Réinitialiser l'analyse
           </Button>
         </div>
+      </Card>
+
+      {/* Revenir sur son choix de mesure d’audience : le retrait se fait ici,
+          en un clic (RGPD, art. 7.3). Mêmes clé et chargeur que le bandeau.
+          Sans clé, la section ne rend rien : `empty:hidden` retire alors la
+          carte, qui resterait vide à l’écran. */}
+      <Card className="empty:hidden">
+        <ConsentSection
+          posthogKey={import.meta.env.VITE_POSTHOG_KEY}
+          loader={() => import('posthog-js/dist/module.slim.js')}
+          titleClassName="text-fluid-base font-semibold"
+        />
       </Card>
 
       {/* Plus de carte « À propos » : elle ne portait que le numéro de version

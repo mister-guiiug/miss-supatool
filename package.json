@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@mister-guiiug/dev-pwa-config": "^6.20.1",
+    "@mister-guiiug/dev-pwa-config": "^6.21.1",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -60,7 +60,7 @@
   "dependencies": {
     "@sentry/react": "^11.1.0",
     "lucide-react": "^1.49.0",
-    "posthog-js": "^1.435.5",
+    "posthog-js": "^1.435.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.4",

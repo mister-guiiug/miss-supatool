@@ -22,10 +22,10 @@ import { checkConnection, isSameProject } from '../core/project.ts';
 import { describeError } from '../core/errors.ts';
 import { redact } from '../core/redact.ts';
 import { ProjectClient } from '../api/http.ts';
-import { fetchSchema } from '../api/postgrest.ts';
-import { listBuckets } from '../api/storage.ts';
 import { runCopy } from '../engine/runner.ts';
+
 import type { CopyEvent, RunSummary } from '../engine/events.ts';
+import { fetchAnalysis } from '../shared/queries/analyze.ts';
 
 export interface Connection {
   url: string;
@@ -241,31 +241,20 @@ export const useStore = create<AppState>()((set, get) => ({
       return;
     }
 
+    // analyzing / analysisError restent dans Zustand : l'UI ne change pas.
     set({ analyzing: true, analysisError: undefined, storageError: undefined });
     try {
-      const [sourceSchema, targetSchema] = await Promise.all([
-        fetchSchema(source, { schema: state.schemaName }),
-        fetchSchema(target, { schema: state.schemaName }),
-      ]);
-
-      let sourceBuckets: SourceBucket[] = [];
-      let targetBucketNames: string[] = [];
-      let storageError: string | undefined;
-      try {
-        const [from, to] = await Promise.all([
-          listBuckets(source),
-          listBuckets(target),
-        ]);
-        sourceBuckets = from.map(b => ({
-          name: b.name,
-          isPublic: b.public,
-          fileSizeLimit: b.file_size_limit ?? null,
-          allowedMimeTypes: b.allowed_mime_types ?? null,
-        }));
-        targetBucketNames = to.map(b => b.name);
-      } catch (error) {
-        storageError = describeError(error);
-      }
+      const result = await fetchAnalysis(
+        {
+          sourceUrl: state.source.url,
+          targetUrl: state.target.url,
+          schema: state.schemaName,
+          sourceKey: state.source.key,
+          targetKey: state.target.key,
+        },
+        source,
+        target
+      );
 
       // Sélection par défaut : TOUT ce que la source peut donner, y compris ce
       // qui manque encore à la cible. Ces tables-là étaient auparavant écartées
@@ -274,7 +263,7 @@ export const useStore = create<AppState>()((set, get) => ({
       // fait maintenant : les écarter reviendrait à cacher la moitié du travail
       // de migration à celui qui vient justement le faire.
       const previous = new Set(get().selectedTables);
-      const candidates = sourceSchema.tables
+      const candidates = result.sourceSchema.tables
         .filter(t => t.insertable)
         .map(t => t.name);
       const selectedTables =
@@ -283,21 +272,21 @@ export const useStore = create<AppState>()((set, get) => ({
           : candidates;
 
       const previousBuckets = new Set(get().selectedBuckets);
-      const bucketNames = sourceBuckets.map(b => b.name);
+      const bucketNames = result.sourceBuckets.map(b => b.name);
       const selectedBuckets =
         previousBuckets.size > 0
           ? bucketNames.filter(name => previousBuckets.has(name))
           : bucketNames;
 
       set({
-        sourceSchema,
-        targetSchema,
-        sourceBuckets,
-        targetBucketNames,
+        sourceSchema: result.sourceSchema,
+        targetSchema: result.targetSchema,
+        sourceBuckets: result.sourceBuckets,
+        targetBucketNames: result.targetBucketNames,
         selectedTables,
         selectedBuckets,
         analyzedAt: Date.now(),
-        ...(storageError ? { storageError } : {}),
+        ...(result.storageError ? { storageError: result.storageError } : {}),
       });
       savePersisted(get());
     } catch (error) {

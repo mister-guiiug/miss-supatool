@@ -1,4 +1,5 @@
 import { HashRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { BottomNav } from '@mister-guiiug/dev-pwa-config/react/bottom-nav';
 import { AppHeader } from '@mister-guiiug/dev-pwa-config/react/app-header';
 import { PageContainer } from '@mister-guiiug/dev-pwa-config/react/page-container';
@@ -20,6 +21,7 @@ import { RunScreen } from './features/run/RunScreen.tsx';
 import { ReportScreen } from './features/report/ReportScreen.tsx';
 import { SettingsScreen } from './features/settings/SettingsScreen.tsx';
 import { UpdatePrompt } from './pwa/UpdatePrompt.tsx';
+import { getQueryClient } from './shared/queries/client.ts';
 
 /**
  * L'ordre est celui d'une migration : brancher, regarder, bâtir, remplir,
@@ -121,8 +123,10 @@ function Shell() {
 
 export function App() {
   return (
-    <HashRouter>
-      <Shell />
-    </HashRouter>
+    <QueryClientProvider client={getQueryClient()}>
+      <HashRouter>
+        <Shell />
+      </HashRouter>
+    </QueryClientProvider>
   );
 }

@@ -10,6 +10,7 @@ import {
 import { ConfirmDialog } from '@mister-guiiug/dev-pwa-config/react/confirm-dialog';
 import { Dices, PlusCircle, RefreshCw } from 'lucide-react';
 import { REGIONS } from '../../api/management.ts';
+import { useOrganizationsQuery } from '../../shared/queries/organizations.ts';
 import { useManagementStore } from '../../store/useManagementStore.ts';
 
 /**
@@ -34,10 +35,11 @@ export function CreateProjectCard() {
   const token = useManagementStore(s => s.token);
   const setToken = useManagementStore(s => s.setToken);
   const organizations = useManagementStore(s => s.organizations);
-  const loading = useManagementStore(s => s.loadingOrganizations);
   const organizationsError = useManagementStore(s => s.organizationsError);
-  const loadOrganizations = useManagementStore(s => s.loadOrganizations);
   const createProject = useManagementStore(s => s.createProject);
+  // Lecture via Query dès qu'un jeton est présent ; le bouton force un refetch.
+  const organizationsQuery = useOrganizationsQuery(token.trim() !== '');
+  const loading = organizationsQuery.isFetching;
   const creating = useManagementStore(s => s.creating);
   const creationStep = useManagementStore(s => s.creationStep);
   const creationError = useManagementStore(s => s.creationError);
@@ -112,7 +114,7 @@ export function CreateProjectCard() {
             loading={loading}
             aria-disabled={token.trim() === ''}
             onClick={() => {
-              if (token.trim() !== '') void loadOrganizations();
+              if (token.trim() !== '') void organizationsQuery.refetch();
             }}
           >
             <RefreshCw aria-hidden="true" size={16} />

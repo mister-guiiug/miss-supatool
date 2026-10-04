@@ -45,6 +45,12 @@ import {
   readStructure,
   type ApplyResult,
 } from '../engine/structure.ts';
+import { getQueryClient } from '../shared/queries/client.ts';
+import {
+  invalidateAnalysis,
+  invalidateOrganizations,
+} from '../shared/queries/invalidate.ts';
+import { queryKeys, tokenScope } from '../shared/queries/keys.ts';
 import { useStore } from './useStore.ts';
 
 export interface CreateProjectDraft {
@@ -205,10 +211,14 @@ export const useManagementStore = create<ManagementState>()((set, get) => ({
     })),
 
   loadOrganizations: async () => {
+    // Même cache que `useOrganizationsQuery` — sans importer le hook (cycle).
+    const token = get().token;
     set({ loadingOrganizations: true, organizationsError: undefined });
     try {
-      const client = clientOrThrow(get().token);
-      const organizations = await client.listOrganizations();
+      const organizations = await getQueryClient().fetchQuery({
+        queryKey: queryKeys.organizations(tokenScope(token)),
+        queryFn: () => clientOrThrow(token).listOrganizations(),
+      });
       set({ organizations });
     } catch (error) {
       set({ organizationsError: describeError(error), organizations: [] });
@@ -259,6 +269,8 @@ export const useManagementStore = create<ManagementState>()((set, get) => ({
             ? 'Projet prêt. Ce projet n’expose qu’une clé « sb_secret_… » : si les appels échouent, remplacez-la par la clé service_role (Settings → API).'
             : 'Projet prêt, connexion cible renseignée.',
       });
+      // Un projet neuf peut apparaître sous l'organisation : invalider le cache.
+      invalidateOrganizations();
     } catch (error) {
       set({ creationError: describeError(error), creationStep: undefined });
     } finally {
@@ -340,7 +352,10 @@ export const useManagementStore = create<ManagementState>()((set, get) => ({
       // l'écran Contenu continuerait d'annoncer « absente de la cible » pour
       // des tables qui viennent d'être créées, et la copie resterait bloquée
       // sur un constat périmé. La sélection, elle, est préservée par `analyze`.
-      if (!get().dryRun) await useStore.getState().analyze();
+      if (!get().dryRun) {
+        invalidateAnalysis();
+        await useStore.getState().analyze();
+      }
     } catch (error) {
       set({ structureError: describeError(error) });
     } finally {

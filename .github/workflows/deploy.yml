@@ -25,6 +25,6 @@ jobs:
       # copie de structure indisponibles sur le site publié ; la copie des
       # données, elle, n'en dépend pas.
       build-env: |
-        VITE_SUPABASE_PROXY=${{ vars.SUPABASE_PROXY_URL }}
         VITE_POSTHOG_KEY=${{ vars.VITE_POSTHOG_KEY }}
         VITE_SENTRY_DSN=${{ vars.VITE_SENTRY_DSN }}
+        VITE_SUPABASE_PROXY=${{ vars.VITE_SUPABASE_PROXY }}

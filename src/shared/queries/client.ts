@@ -1,24 +1,10 @@
-import { QueryClient } from '@tanstack/react-query';
-
-function createAppQueryClient(): QueryClient {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 30_000,
-        retry: 1,
-        // Pas de refetch au focus : une analyse ou une liste d'organisations
-        // n'est pas un flux temps réel, et un retour d'onglet ne doit pas
-        // relancer des appels munis d'un jeton d'accès personnel.
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: true,
-      },
-    },
-  });
-}
-
-let client: QueryClient | undefined;
-
-export function getQueryClient(): QueryClient {
-  client ??= createAppQueryClient();
-  return client;
-}
+/**
+ * Client Query — defaults PWA du socle (focus coupé, retry 1, stale 30 s).
+ * Les jetons Management ne partent pas au simple retour d'onglet.
+ */
+export {
+  getQueryClient,
+  createQueryClient,
+  resetQueryClient,
+  PWA_QUERY_DEFAULTS,
+} from '@mister-guiiug/dev-pwa-config/react/query-client';

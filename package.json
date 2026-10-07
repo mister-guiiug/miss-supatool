@@ -41,7 +41,7 @@
     "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.1",
+    "@vitejs/plugin-react": "^6.1.2",
     "@vitest/coverage-v8": "^5.0.3",
     "eslint": "^10.12.0",
     "husky": "^9.1.7",
@@ -57,10 +57,10 @@
     "vitest": "^5.0.3"
   },
   "dependencies": {
-    "@sentry/react": "^11.4.0",
+    "@sentry/react": "^11.5.0",
     "@tanstack/react-query": "^5.104.1",
     "lucide-react": "^1.52.0",
-    "posthog-js": "^1.438.1",
+    "posthog-js": "^1.438.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.4",
@@ -71,6 +71,9 @@
   "overrides": {
     "eslint-plugin-jsx-a11y": {
       "eslint": "$eslint"
+    },
+    "@rolldown/plugin-babel": {
+      "@babel/plugin-transform-runtime": "^7.29.0"
     }
   }
 }

@@ -12,6 +12,11 @@ import type { CopyEvent } from './events.ts';
 const SOURCE = 'https://source.supabase.co';
 const TARGET = 'https://cible.supabase.co';
 
+/** L'appel vise-t-il ce projet ? Par l'origine de l'URL, pas par un préfixe
+ *  de texte, qui laisserait passer https://source.supabase.co.ailleurs.net
+ *  (CodeQL js/incomplete-url-substring-sanitization). */
+const vise = (url: string, projet: string) => new URL(url).origin === projet;
+
 function tablePlan(table: string, columns = ['id', 'label']): TablePlan {
   return {
     table,
@@ -65,7 +70,7 @@ function build(handlers: Handler[]) {
 }
 
 const oneSmallPage: Handler = call =>
-  call.url.startsWith(SOURCE) ? { body: rows(1, 2) } : { status: 201 };
+  vise(call.url, SOURCE) ? { body: rows(1, 2) } : { status: 201 };
 
 describe('runCopy', () => {
   it('copie les tables dans l’ordre du plan et rend un bilan', async () => {
@@ -108,7 +113,7 @@ describe('runCopy', () => {
     const events: CopyEvent[] = [];
     const set = build([
       call =>
-        call.url.startsWith(TARGET)
+        vise(call.url, TARGET)
           ? { status: 400, text: 'colonne inconnue' }
           : undefined,
       oneSmallPage,
@@ -133,12 +138,12 @@ describe('runCopy', () => {
     let posts = 0;
     const set = build([
       call => {
-        if (!call.url.startsWith(TARGET)) return undefined;
+        if (!vise(call.url, TARGET)) return undefined;
         posts += 1;
         // Le premier lot passe, le second est refusé.
         return posts === 1 ? { status: 201 } : { status: 400, text: 'refus' };
       },
-      call => (call.url.startsWith(SOURCE) ? { body: rows(1, 4) } : undefined),
+      call => (vise(call.url, SOURCE) ? { body: rows(1, 4) } : undefined),
     ]);
     const summary = await runCopy({
       source: set.source,
@@ -161,9 +166,7 @@ describe('runCopy', () => {
   it('poursuit et rapporte tout quand on ne lui demande pas de s’arrêter', async () => {
     const set = build([
       call =>
-        call.url.startsWith(TARGET)
-          ? { status: 400, text: 'refus' }
-          : undefined,
+        vise(call.url, TARGET) ? { status: 400, text: 'refus' } : undefined,
       oneSmallPage,
     ]);
     const summary = await runCopy({

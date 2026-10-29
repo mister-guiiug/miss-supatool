@@ -8,6 +8,11 @@ import type { CopyEvent } from './events.ts';
 const SOURCE = 'https://source.supabase.co';
 const TARGET = 'https://cible.supabase.co';
 
+/** L'appel vise-t-il ce projet ? Par l'origine de l'URL, pas par un préfixe
+ *  de texte, qui laisserait passer https://source.supabase.co.ailleurs.net
+ *  (CodeQL js/incomplete-url-substring-sanitization). */
+const vise = (url: string, projet: string) => new URL(url).origin === projet;
+
 const bucketPlan: BucketPlan = {
   bucket: 'photos',
   isPublic: false,
@@ -21,7 +26,7 @@ const bucketPlan: BucketPlan = {
  * dedans. Le listage n'étant pas récursif, c'est le parcours qu'on éprouve.
  */
 const listing: Handler = call => {
-  if (!call.url.startsWith(SOURCE)) return undefined;
+  if (!vise(call.url, SOURCE)) return undefined;
   if (!call.path.startsWith('/storage/v1/object/list/')) return undefined;
   const body = JSON.parse(call.body ?? '{}') as {
     prefix: string;
@@ -80,11 +85,10 @@ describe('copyBucket', () => {
     const set = clients([
       listing,
       call =>
-        call.url.startsWith(SOURCE) && call.method === 'GET'
+        vise(call.url, SOURCE) && call.method === 'GET'
           ? { text: 'contenu' }
           : undefined,
-      call =>
-        call.url.startsWith(TARGET) ? { status: 200, body: {} } : undefined,
+      call => (vise(call.url, TARGET) ? { status: 200, body: {} } : undefined),
     ]);
 
     const outcome = await copyBucket(bucketPlan, {
@@ -101,7 +105,7 @@ describe('copyBucket', () => {
     expect(copied.sort()).toEqual(['2026/ete.jpg', 'racine.png']);
 
     const uploads = set.fake.calls.filter(
-      c => c.url.startsWith(TARGET) && c.method === 'POST'
+      c => vise(c.url, TARGET) && c.method === 'POST'
     );
     expect(uploads.map(u => u.path)).toContain(
       '/storage/v1/object/photos/2026/ete.jpg'
@@ -114,11 +118,11 @@ describe('copyBucket', () => {
     const set = clients([
       listing,
       call =>
-        call.url.startsWith(SOURCE) && call.method === 'GET'
+        vise(call.url, SOURCE) && call.method === 'GET'
           ? { text: 'contenu' }
           : undefined,
       call =>
-        call.url.startsWith(TARGET)
+        vise(call.url, TARGET)
           ? { status: 409, body: { message: 'Duplicate' } }
           : undefined,
     ]);
@@ -147,15 +151,15 @@ describe('copyBucket', () => {
     expect(outcome.objects).toBe(2);
     // Les tailles annoncées par le listage suffisent à estimer le volume.
     expect(outcome.bytes).toBe(30);
-    expect(set.fake.calls.some(c => c.url.startsWith(TARGET))).toBe(false);
+    expect(set.fake.calls.some(c => vise(c.url, TARGET))).toBe(false);
   });
 
   it('crée le seau manquant en reprenant ses réglages', async () => {
     const set = clients([
       listing,
-      call => (call.url.startsWith(TARGET) ? { body: {} } : undefined),
+      call => (vise(call.url, TARGET) ? { body: {} } : undefined),
       call =>
-        call.url.startsWith(SOURCE) && call.method === 'GET'
+        vise(call.url, SOURCE) && call.method === 'GET'
           ? { text: 'x' }
           : undefined,
     ]);

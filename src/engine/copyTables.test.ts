@@ -8,6 +8,11 @@ import type { CopyEvent } from './events.ts';
 const SOURCE = 'https://source.supabase.co';
 const TARGET = 'https://cible.supabase.co';
 
+/** L'appel vise-t-il ce projet ? Par l'origine de l'URL, pas par un préfixe
+ *  de texte, qui laisserait passer https://source.supabase.co.ailleurs.net
+ *  (CodeQL js/incomplete-url-substring-sanitization). */
+const vise = (url: string, projet: string) => new URL(url).origin === projet;
+
 const plan: TablePlan = {
   table: 'clients',
   columns: ['id', 'label'],
@@ -76,7 +81,7 @@ function context(
 describe('copyTable', () => {
   it('parcourt les pages au curseur et écrit par lots', async () => {
     const pages: Handler = call => {
-      if (!call.url.startsWith(SOURCE) || !call.path.includes('select=')) {
+      if (!vise(call.url, SOURCE) || !call.path.includes('select=')) {
         return undefined;
       }
       if (call.path.includes('limit=1')) return undefined;
@@ -88,7 +93,7 @@ describe('copyTable', () => {
       return { body: [] };
     };
     const writes: Handler = call =>
-      call.url.startsWith(TARGET) && call.method === 'POST'
+      vise(call.url, TARGET) && call.method === 'POST'
         ? { status: 201 }
         : undefined;
 
@@ -106,7 +111,7 @@ describe('copyTable', () => {
     expect(outcome.written).toBe(7);
     // 3 lignes en lots de 2 → 2 requêtes par page pleine, 1 pour la dernière.
     const posts = clients.fake.calls.filter(
-      c => c.method === 'POST' && c.url.startsWith(TARGET)
+      c => c.method === 'POST' && vise(c.url, TARGET)
     );
     expect(posts).toHaveLength(5);
     expect(posts[0]?.path).toContain('on_conflict=id');
@@ -119,8 +124,7 @@ describe('copyTable', () => {
   it('ne touche jamais la source : aucune écriture ne part vers elle', async () => {
     const clients = makeClients([
       countHandler(2),
-      call =>
-        call.url.startsWith(SOURCE) ? { body: rows(1, 2) } : { status: 201 },
+      call => (vise(call.url, SOURCE) ? { body: rows(1, 2) } : { status: 201 }),
     ]);
     const { ctx } = context(clients.fake, clients, {
       ...DEFAULT_OPTIONS,
@@ -128,15 +132,13 @@ describe('copyTable', () => {
       pageSize: 10,
     });
     await copyTable(plan, ctx);
-    expect(clients.fake.writes.filter(c => c.url.startsWith(SOURCE))).toEqual(
-      []
-    );
+    expect(clients.fake.writes.filter(c => vise(c.url, SOURCE))).toEqual([]);
   });
 
   it('en simulation, lit tout et n’écrit rien', async () => {
     const clients = makeClients([
       countHandler(2),
-      call => (call.url.startsWith(SOURCE) ? { body: rows(1, 2) } : undefined),
+      call => (vise(call.url, SOURCE) ? { body: rows(1, 2) } : undefined),
     ]);
     const { ctx } = context(clients.fake, clients, {
       ...DEFAULT_OPTIONS,
@@ -146,7 +148,7 @@ describe('copyTable', () => {
     const outcome = await copyTable(plan, ctx);
     expect(outcome.read).toBe(2);
     expect(outcome.written).toBe(0);
-    expect(clients.fake.calls.some(c => c.url.startsWith(TARGET))).toBe(false);
+    expect(clients.fake.calls.some(c => vise(c.url, TARGET))).toBe(false);
   });
 
   it('bascule sur le décalage quand la clé primaire ne peut pas servir de curseur', async () => {
@@ -156,7 +158,7 @@ describe('copyTable', () => {
     const clients = makeClients([
       countHandler(4),
       call => {
-        if (!call.url.startsWith(SOURCE)) return { status: 201 };
+        if (!vise(call.url, SOURCE)) return { status: 201 };
         if (call.path.includes('limit=1')) return undefined;
         page += 1;
         if (page === 1)
@@ -185,7 +187,7 @@ describe('copyTable', () => {
     const outcome = await copyTable(plan, ctx);
     expect(outcome.read).toBe(4);
     const reads = clients.fake.calls.filter(
-      c => c.url.startsWith(SOURCE) && !c.path.includes('limit=1')
+      c => vise(c.url, SOURCE) && !c.path.includes('limit=1')
     );
     expect(reads[1]?.path).toContain('offset=2');
   });
@@ -194,7 +196,7 @@ describe('copyTable', () => {
     const clients = makeClients([
       call =>
         call.headers.prefer?.startsWith('count=') ? { status: 500 } : undefined,
-      call => (call.url.startsWith(SOURCE) ? { body: rows(1, 1) } : undefined),
+      call => (vise(call.url, SOURCE) ? { body: rows(1, 1) } : undefined),
     ]);
     const { ctx, events } = context(clients.fake, clients, {
       ...DEFAULT_OPTIONS,

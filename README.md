@@ -195,6 +195,7 @@ npm run dev
 | -------------------- | ---------------------------------------- |
 | `npm run dev`        | Serveur de développement (port 5173)     |
 | `npm test`           | Tests unitaires (Vitest)                 |
+| `npm run test:e2e`   | E2E Playwright, projets simulés          |
 | `npm run type-check` | `tsc -b`                                 |
 | `npm run lint`       | ESLint                                   |
 | `npm run format`     | Prettier                                 |
@@ -214,6 +215,16 @@ npm run dev
 Le `fetch` est injecté de bout en bout : les tests éprouvent la pagination, les
 reprises, l'arrêt et l'invariant de lecture seule sans réseau ni serveur
 factice.
+
+Les tests **de bout en bout** (`e2e/`, Playwright) passent sur le build de
+production, servi sur le port 4173. Faute de backend propre, les deux projets
+Supabase y sont simulés par `page.route` (`e2e/projets-factices.ts`), à des
+adresses en `.invalid` qui ne se résolvent jamais et avec une valeur qui n'est
+pas une clé : rien ne sort du navigateur. `smoke.spec.ts` (`@critical`)
+vérifie que l'app monte, le refus d'une copie d'un projet sur lui-même et une
+analyse complète où la source n'est que lue ; `a11y.spec.ts` (`@a11y`) passe
+axe sur les projets, le contenu après analyse et les réglages, en clair et en
+sombre. La CI joue les deux, sur chromium et mobile-chrome.
 
 Configuration partagée de la famille :
 [`@mister-guiiug/dev-pwa-config`](https://github.com/mister-guiiug/dev-pwa-config).

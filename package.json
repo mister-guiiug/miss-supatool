@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "type-check": "tsc -b",
     "type-check:7": "pwa-typecheck-7",
     "icons": "pwa-icons --source public/favicon.svg --out public --sizes 180,192,512 --bg 11,26,20",
@@ -32,8 +33,10 @@
     "*.{ts,tsx,js,mjs,json,css,md,yml,yaml}": "prettier --write"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^10.0.1",
     "@mister-guiiug/dev-pwa-config": "^6.33.0",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.4",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",

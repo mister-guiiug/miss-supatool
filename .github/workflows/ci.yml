@@ -27,12 +27,16 @@ jobs:
       #   · code source + soutien sur tous les écrans, rendus par la coquille
       # Le mode strict s'active quand cette liste est vide. Pas avant : une CI
       # rouge sur une dette connue et non traitée n'apprend rien à personne.
-      # Aucune suite Playwright ici : `@playwright/test` n'est pas installé et
-      # le dépôt ne contient pas une seule spec (relevé du 19/09/2026). Il n'y
-      # a donc rien à jouer — et le réutilisable ferait échouer le job plutôt
-      # que de sortir vert sur zéro test. À repasser à `true` le jour où une
-      # suite `e2e/` existe.
-      run-e2e: false
+      # La suite `e2e/` tourne sur le build de production. L'app n'a pas de
+      # backend à elle : les deux projets Supabase sont SIMULÉS par
+      # `page.route`, à des adresses en `.invalid` qui ne se résolvent jamais,
+      # avec une valeur qui n'est pas une clé (`e2e/projets-factices.ts`).
+      # Aucun secret, aucune base — rien à passer ici. Le filtre reste le
+      # défaut du socle (`@critical|@a11y`) : les deux specs sont taguées.
+      run-e2e: true
+      # Sur le bureau ET sur un téléphone, comme les apps sœurs.
+      # `mobile-chrome` réutilise Chromium, rien de plus à installer.
+      e2e-project: chromium mobile-chrome
       # Second avis TypeScript 7, NON BLOQUANT. La 6 reste la référence : c'est
       # elle que typescript-eslint résout, et il refuse la 7.0 par une assertion
       # à l'import. Le jour où typescript-eslint#10940 se ferme, cette entrée

@@ -16,3 +16,7 @@ coverage/
 # worktree » : masquées par `.git/info/exclude` (local), donc invisibles à
 # `git status` ici mais analysées par Prettier et ESLint partout ailleurs.
 .claude/worktrees/
+
+# Artefacts Playwright — rapports, traces, vidéos, captures d’échec.
+playwright-report/
+test-results/

@@ -11,6 +11,11 @@ tables et les fichiers des seaux de stockage.
 
 ---
 
+## Guides
+
+- [Migrer un projet Supabase](https://mister-guiiug.github.io/miss-supatool/migrer-un-projet-supabase.html)
+- [Sauvegarder et restaurer une base Supabase](https://mister-guiiug.github.io/miss-supatool/sauvegarder-restaurer-base-supabase.html)
+
 ## Ce que fait l'outil
 
 | Étape         | Ce qu'elle fait                                                                                                                                        | Ce qu'il faut                     |

@@ -9,7 +9,7 @@
     "dev": "wrangler dev"
   },
   "devDependencies": {
-    "wrangler": "^4.166.0"
+    "wrangler": "^4.169.0"
   },
   "overrides": {
     "miniflare": {
